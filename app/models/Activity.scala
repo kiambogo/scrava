@@ -1,0 +1,53 @@
+package models
+
+/**
+ * Created by christopher on 2014-09-15.
+ */
+case class Activity(
+  id: Int,
+  resourceState: Int,
+  externalId: String,
+  uploadId: Int,
+  athlete: Athlete,
+  name: String,
+  distance: Float,
+  movingTime: Int,
+  elapsedTime: Int,
+  totalElevationGain: Float,
+  `type`: String,
+  startDate: String,
+  startDateLocal: String,
+  timeZone: String,
+  startLatlng: String,
+  endLatlng: String,
+  locationCity: String,
+  locationState: String,
+  achievementCount: Int,
+  kudosCount: Int,
+  commentCount: Int,
+  athleteCount: Int,
+  photoCount: Int,
+  map: Polyline,
+  trainer: Boolean,
+  commute: Boolean,
+  manual: Boolean,
+  `private`: Boolean,
+  flagged: Boolean,
+  gearId: String,
+  averageSpeed: Float,
+  maxSpeed: Float,
+  averageCadence: Float,
+  averageTemp: Int,
+  averageWatts: Float,
+  kilojoules: Float,
+  averageHeartrate: Float,
+  maxHeartrate: Float,
+  calories: Float,
+  truncated: Int,
+  hasKudoed: Boolean,
+  segmentEfforts: List[SegmentEffort],
+  splitsMetric: List[SplitMetrics],
+  splitsStandard: List[SplitsStandard],
+  bestEfforts: List[BestEfforts]) {
+
+}
