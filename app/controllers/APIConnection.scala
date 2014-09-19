@@ -4,7 +4,7 @@ package controllers
  * Created by christopher on 2014-09-15.
  */
 
-import models.{SegmentEffort, Athlete}
+import models.{AthleteSummary, SegmentEffort, Athlete}
 import play.api.libs.ws.WS
 
 import scala.concurrent.Future
@@ -33,14 +33,56 @@ case class Connection(
     }
   }
 
-  def listAthleteKOMs(id: Int, page: Int, resultsPerPage: Int): Future[List[SegmentEffort]] = {
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms")
+  def listCurrentAthleteKOMs(page: Option[Int], resultsPerPage: Option[Int]): Future[List[SegmentEffort]] = {
+    WS.url("https://www.strava.com/api/v3/athlete/koms")
+      .withQueryString("page" -> page.iterator.next().toString)
+      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
       response.json.validate[List[SegmentEffort]].fold(
         errors => throw new RuntimeException("Could not parse list of KOMs"),
         koms => koms
+      )
+    }
+  }
+
+  def listAthleteKOMs(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[SegmentEffort]] = {
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms")
+      .withQueryString("page" -> page.iterator.next().toString)
+      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+      .withHeaders("Authorization" -> authString)
+      .get()
+      .map { response =>
+      response.json.validate[List[SegmentEffort]].fold(
+        errors => throw new RuntimeException("Could not parse list of KOMs"),
+        koms => koms
+      )
+    }
+  }
+
+  def listCurrentAthleteFriends(page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
+    WS.url("https://www.strava.com/api/v3/athlete/friends")
+      .withQueryString("page" -> page.iterator.next().toString)
+      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+      .get()
+      .map { response =>
+      response.json.validate[List[AthleteSummary]].fold(
+        errors => throw new RuntimeException("Could not parse list of friends (AthleteSummary)"),
+        friends => friends
+      )
+    }
+  }
+
+  def listAthleteFriends(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id/friends")
+      .withQueryString("page" -> page.iterator.next().toString)
+      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+      .get()
+      .map { response =>
+      response.json.validate[List[AthleteSummary]].fold(
+        errors => throw new RuntimeException("Could not parse list of friends (AthleteSummary)"),
+        friends => friends
       )
     }
   }
