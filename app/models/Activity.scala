@@ -47,7 +47,7 @@ case class Activity(
   hasKudoed: Boolean,
   segmentEfforts: List[SegmentEffort],
   splitsMetric: List[SplitMetrics],
-  splitsStandard: List[SplitsStandard],
-  bestEfforts: List[BestEfforts]) {
+  splitsStandard: List[SplitStandard],
+  bestEfforts: List[SegmentEffort]) {
 
 }
