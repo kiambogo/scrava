@@ -4,26 +4,33 @@ package controllers
  * Created by christopher on 2014-09-15.
  */
 
-import models.{Activity, AthleteSummary, SegmentEffort, Athlete}
+import models.JsonProtocol._
+import models._
 import org.joda.time.DateTime
-import play.api.Logger
+import org.joda.time.format.ISODateTimeFormat
+import play.api.Play.current
 import play.api.libs.ws.WS
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
-case class Connection(
-                       accessToken: String,
-                       athlete: Athlete) {
+case class Connection (
+  accessToken: String,
+  athlete: Athlete) {
 
   val authString = "Bearer " + accessToken
 
-  def updateAthlete(parameters: Map): Future[Athlete] = {
+  def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): Future[Athlete] = {
     WS.url("https://www.strava.com/api/v3/athlete")
       .withHeaders("Authorization" -> authString)
-      .put(parameters)
+      .put(Map(
+        "city" -> Seq(city),
+        "state" -> Seq(state),
+        "country" -> Seq(country),
+        "sex" -> Seq(sex),
+        "weight" -> Seq(weight.toString)))
       .map { response =>
-      response.json.validate[Athlete].fold(
+      response.json.validate[Athlete](athleteReads).fold(
         errors => throw new RuntimeException("Could not parse athlete"),
         athlete => athlete
       )}
@@ -33,7 +40,7 @@ case class Connection(
     WS.url(s"https://www.strava.com/api/v3/athlete/$id")
       .get()
       .map { response =>
-      response.json.validate[Athlete].fold(
+      response.json.validate[Athlete](athleteReads).fold(
         errors => throw new RuntimeException("Could not parse athlete"),
         athlete => athlete
       )}
@@ -46,7 +53,7 @@ case class Connection(
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-      response.json.validate[List[SegmentEffort]].fold(
+      response.json.validate[List[SegmentEffort]](segmentEffortReads).fold(
         errors => throw new RuntimeException("Could not parse list of KOMs"),
         koms => koms
       )}
@@ -116,11 +123,11 @@ case class Connection(
     WS.url("https://www.strava.com/api/v3/activities")
       .withHeaders("Authorization" -> authString)
       .post(Map(
-      "name" -> name,
-      "elapsed_time" -> elapsedTime,
-      "distance" -> distance,
-      "start_date_local" -> startDateLocal,
-      "type" -> `type`
+      "name" -> Seq(name),
+      "elapsed_time" -> Seq(elapsedTime.toString),
+      "distance" -> Seq(distance.get.toString),
+      "start_date_local" -> Seq(startDateLocal.toString(ISODateTimeFormat.dateTime())),
+      "type" -> Seq(`type`)
     ))
       .map { response =>
       response.json.validate[Activity].fold(
@@ -129,16 +136,59 @@ case class Connection(
       )}
   }
 
-  def retrieveActivity(id: Int, includeEfforts: Option[Boolean]): Future[Activity] = {
+  def retrieveActivity(id: Long, includeEfforts: Option[Boolean]): Future[Activity] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .withQueryString("include_all_efforts" -> includeEfforts.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[Activity].fold(
+      response.json.validate[Activity](activityReads).fold(
         errors => throw new RuntimeException("Could not parse activity"),
         activity => activity
-      )
+      )}
+  }
 
+  def updateActivity(
+    id: Long,
+    name: Option[String],
+    `type`: Option[String],
+    `private`: Option[Boolean],
+    commute: Option[Boolean],
+    trainer: Option[Boolean],
+    gearId: Option[String],
+    description: Option[String]): Future[Activity] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id")
+      .withQueryString("name" -> name.iterator.next())
+      .withQueryString("type" -> `type`.iterator.next())
+      .withQueryString("private" -> `private`.iterator.next().toString)
+      .withQueryString("commute" -> commute.iterator.next().toString)
+      .withQueryString("trainer" -> trainer.iterator.next().toString)
+      .withQueryString("gear_id" -> name.iterator.next())
+      .withQueryString("description" -> name.iterator.next())
+      .put(Map(
+      "id" -> Seq(id.toString),
+      "name" -> Seq(name.get),
+      "type" -> Seq(`type`.get),
+      "private" -> Seq(`private`.get.toString),
+      "commute" -> Seq(commute.get.toString),
+      "trainer" -> Seq(trainer.get.toString),
+      "gearId" -> Seq(gearId.get),
+      "description" -> Seq(description.get)))
+      .map { response =>
+      response.json.validate[Activity](activityReads).fold(
+        errors => throw new RuntimeException("Could not parse activity"),
+        activity => activity
+      )}
+  }
+
+  def deleteActivity(id: Long): Future[Boolean] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id")
+      .delete()
+      .map { response =>
+      response.status.equals(204)
     }
   }
+
+  //  def listAthleteActivities(before: Option[Int], after: Option[Int], page: Option[Int], perPage: Option[Int]): List[ActivitySummary] = {
+  //
+  //  }
 }

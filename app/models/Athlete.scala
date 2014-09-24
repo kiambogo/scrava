@@ -6,14 +6,9 @@ package models
 case class Athlete(
   id: Int,
   resourceState: String,
-  firstname: String,
-  lastname: String,
+  athleteData: AthleteData,
   profile_medium: String,
   profile: String,
-  city: String,
-  state: String,
-  country: String,
-  sex: String,
   friend: String,
   follower: String,
   premium: Boolean,
@@ -32,6 +27,14 @@ case class Athlete(
   shoes: List[Gear]) {
 
 }
+
+case class AthleteData(
+  firstname: String,
+  lastname: String,
+  city: String,
+  state: String,
+  country: String,
+  sex: String )
 
 case class AthleteSummary(
   id:	Int,
@@ -53,3 +56,4 @@ case class AthleteSummary(
 ) {
 
 }
+
