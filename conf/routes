@@ -7,7 +7,16 @@ GET     /                           controllers.Application.index
 GET     /athlete/                   controllers.Application.athlete
 GET     /koms/                      controllers.Application.koms
 GET     /friends/                   controllers.Application.friends
-GET     /streams/time               controllers.Application.timeStream
+
+GET     /:id/streams/time               controllers.Application.timeStream(id)
+GET     /:id/streams/latlng             controllers.Application.latlngStream(id)
+GET     /:id/streams/altitude           controllers.Application.altitudeStream(id)
+GET     /:id/streams/velocity           controllers.Application.velocityStream(id)
+GET     /:id/streams/heartrate          controllers.Application.heartrateStream(id)
+GET     /:id/streams/cadence            controllers.Application.cadenceStream(id)
+GET     /:id/streams/watts              controllers.Application.wattsStream(id)
+
+
 
 
 # Map static resources from the /public folder to the /assets URL path

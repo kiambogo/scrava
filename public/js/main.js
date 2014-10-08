@@ -41,4 +41,24 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
                 console.log("Error fetching all bets: " + e);
             })
     };
+
+    $scope.getLatLngStream = function() {
+        $http.get('/streams/latlng').
+            success(function(data) {
+              console.log(data);
+            }).
+            error(function(e) {
+                console.log("Error fetching all bets: " + e);
+            })
+    };
+
+    $scope.getVelocityStream = function() {
+        $http.get('/streams/velocity').
+            success(function(data) {
+              console.log(data);
+            }).
+            error(function(e) {
+                console.log("Error fetching all bets: " + e);
+            })
+    };
 }]);

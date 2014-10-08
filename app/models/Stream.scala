@@ -12,12 +12,12 @@ case class LatLngStream(
   distance: Distance)
 
 case class AltitudeStream(
-  altitude: Altitude,
-  distance: Distance)
+  distance: Distance,
+  altitude: Altitude)
 
 case class VelocityStream(
-  velocity: Velocity,
-  distance: Distance)
+  distance: Distance,
+  velocity: Velocity)
 
 case class HeartrateStream(
   heartrate: Heartrate,
@@ -45,7 +45,7 @@ case class GradeStream(
 
 case class LatLng(
   `type`: String,
-  data: Map[Float, Float],
+  data: List[List[Float]],
   series_type: String,
   original_size: Int,
   resolution: String)

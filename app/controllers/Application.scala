@@ -27,7 +27,31 @@ object Application extends Controller {
     client.listCurrentAthleteFriends(None,None).map(friends => Ok(write(friends)))
   }
 
-  def timeStream = Action.async {
-    client.getTimeStream("203252263").map(timeStream => Ok(write(timeStream)))
+  def timeStream(id: String) = Action.async {
+    client.getTimeStream(id).map(timeStream => Ok(write(timeStream)))
+  }
+
+  def latlngStream(id: String) = Action.async {
+    client.getLatLngStream(id).map(latlngStream => Ok(write(latlngStream)))
+  }
+
+  def altitudeStream(id: String) = Action.async {
+    client.getAltitudeStream(id).map(altitudeStream => Ok(write(altitudeStream)))
+  }
+
+  def velocityStream(id: String) = Action.async {
+    client.getVelocityStream(id).map(velocityStream => Ok(write(velocityStream)))
+  }
+
+  def heartrateStream(id: String) = Action.async {
+    client.getHeartRateStream(id).map(heartrateStream => Ok(write(heartrateStream)))
+  }
+
+  def cadenceStream(id: String) = Action.async {
+    client.getCadenceStream(id).map(cadenceStream => Ok(write(cadenceStream)))
+  }
+
+  def wattsStream(id: String) = Action.async {
+    client.getWattsStream(id).map(wattsStream => Ok(write(wattsStream)))
   }
 }

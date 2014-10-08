@@ -14,7 +14,7 @@ import play.api.libs.ws.WS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ScravaClient (accessToken: String) {
+class ScravaClient(accessToken: String) {
 
   implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
@@ -189,7 +189,7 @@ class ScravaClient (accessToken: String) {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .delete()
       .map { response =>
-      response.status.equals(204)
+        response.status.equals(204)
     }
   }
 
@@ -202,6 +202,66 @@ class ScravaClient (accessToken: String) {
       .get()
       .map { response =>
         TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
+    }
+  }
+
+  def getLatLngStream(id: String): Future[LatLngStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/latlng")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      LatLngStream((parse(response.body))(0).extract[LatLng], (parse(response.body))(1).extract[Distance])
+    }
+  }
+
+  def getAltitudeStream(id: String): Future[AltitudeStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/altitude")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      AltitudeStream((parse(response.body))(0).extract[Distance], (parse(response.body))(1).extract[Altitude])
+    }
+  }
+
+  def getVelocityStream(id: String): Future[VelocityStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      VelocityStream((parse(response.body))(0).extract[Distance], (parse(response.body))(1).extract[Velocity])
+    }
+  }
+
+  def getHeartRateStream(id: String): Future[HeartrateStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      HeartrateStream((parse(response.body))(0).extract[Heartrate], (parse(response.body))(1).extract[Distance])
+    }
+  }
+
+  def getCadenceStream(id: String): Future[CadenceStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      CadenceStream((parse(response.body))(0).extract[Cadence], (parse(response.body))(1).extract[Distance])
+    }
+  }
+
+  def getWattsStream(id: String): Future[WattsStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      WattsStream((parse(response.body))(0).extract[Watts], (parse(response.body))(1).extract[Distance])
     }
   }
 }
