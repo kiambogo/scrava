@@ -10,13 +10,11 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Play.current
 import play.api.libs.ws.WS
-import play.Logger._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class Connection (
-  accessToken: String) {
+class ScravaClient (accessToken: String) {
 
   implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
@@ -78,9 +76,14 @@ case class Connection (
   }
 
   def listAthleteFriends(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id/friends")
-      .withQueryString("page" -> page.iterator.next().toString)
-      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id/friends$params")
+      .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
         parse(response.body).extract[List[AthleteSummary]]
@@ -88,9 +91,14 @@ case class Connection (
   }
 
   def listCurrentAthleteFollowers(page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
-    WS.url("https://www.strava.com/api/v3/athlete/followers")
-      .withQueryString("page" -> page.iterator.next().toString)
-      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/athlete/followers$params")
+      .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
         parse(response.body).extract[List[AthleteSummary]]
@@ -98,9 +106,14 @@ case class Connection (
   }
 
   def listAthleteFollowers(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id/followers")
-      .withQueryString("page" -> page.iterator.next().toString)
-      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id/followers$params")
+      .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
         parse(response.body).extract[List[AthleteSummary]]
@@ -115,10 +128,6 @@ case class Connection (
       .map { response =>
         parse(response.body).extract[List[AthleteSummary]]
     }
-//      response.json.validate[List[AthleteSummary]].fold(
-//        errors => throw new RuntimeException("Could not parse list of followers (AthleteSummary)"),
-//        followers => followers
-//      )}
   }
 
   def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int, description: Option[String], distance: Option[Float]): Future[Activity] = {
@@ -134,10 +143,6 @@ case class Connection (
       .map { response =>
         parse(response.body).extract[Activity]
     }
-//      response.json.validate[Activity].fold(
-//        errors => throw new RuntimeException("Could not parse athlete"),
-//        activity => activity
-//      )}
   }
 
   def retrieveActivity(id: Long, includeEfforts: Option[Boolean]): Future[Activity] = {
@@ -147,10 +152,6 @@ case class Connection (
       .map { response =>
         parse(response.body).extract[Activity]
     }
-//      response.json.validate[Activity](activityReads).fold(
-//        errors => throw new RuntimeException("Could not parse activity"),
-//        activity => activity
-//      )}
   }
 
   def updateActivity(
@@ -182,10 +183,6 @@ case class Connection (
       .map { response =>
         parse(response.body).extract[Activity]
     }
-//      response.json.validate[Activity](activityReads).fold(
-//        errors => throw new RuntimeException("Could not parse activity"),
-//        activity => activity
-//      )}
   }
 
   def deleteActivity(id: Long): Future[Boolean] = {
@@ -196,7 +193,15 @@ case class Connection (
     }
   }
 
-  //  def listAthleteActivities(before: Option[Int], after: Option[Int], page: Option[Int], perPage: Option[Int]): List[ActivitySummary] = {
-  //
-  //  }
+
+
+  def getTimeStream(id: String): Future[TimeStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/time")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+        TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
+    }
+  }
 }

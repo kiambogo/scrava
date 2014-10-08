@@ -31,4 +31,14 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
                 console.log("Error fetching all bets: " + e);
             })
     };
+
+    $scope.getTimeStream = function() {
+        $http.get('/streams/time').
+            success(function(data) {
+              console.log(data);
+            }).
+            error(function(e) {
+                console.log("Error fetching all bets: " + e);
+            })
+    };
 }]);
