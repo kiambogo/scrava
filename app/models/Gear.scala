@@ -7,10 +7,6 @@ case class Gear(
   id: String,
   primary: Boolean,
   name: String,
-  distance: Float,
-  brandName: String,
-  modelName: String,
-  frameType: String,
-  description: String,
-  resourceState: Int) {
+  resource_state: Int,
+  distance: Int) {
 }

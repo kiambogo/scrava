@@ -5,7 +5,9 @@ package models
  */
 case class Club(
   id: Int,
-  resourceState: Int,
-  name: String) {
+  resource_state: Int,
+  name: String,
+  profile_medium: String,
+  profile: String) {
 
 }

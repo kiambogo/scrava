@@ -4,20 +4,21 @@ package controllers
  * Created by christopher on 2014-09-15.
  */
 
-import models.JsonProtocol._
 import models._
+import net.liftweb.json._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Play.current
 import play.api.libs.ws.WS
+import play.Logger._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class Connection (
-  accessToken: String,
-  athlete: Athlete) {
+  accessToken: String) {
 
+  implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
 
   def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): Future[Athlete] = {
@@ -30,45 +31,50 @@ case class Connection (
         "sex" -> Seq(sex),
         "weight" -> Seq(weight.toString)))
       .map { response =>
-      response.json.validate[Athlete](athleteReads).fold(
-        errors => throw new RuntimeException("Could not parse athlete"),
-        athlete => athlete
-      )}
+        parse(response.body).extract[Athlete] }
   }
 
-  def findAthlete(id: Int): Future[Athlete] = {
-    WS.url(s"https://www.strava.com/api/v3/athlete/$id")
-      .get()
-      .map { response =>
-      response.json.validate[Athlete](athleteReads).fold(
-        errors => throw new RuntimeException("Could not parse athlete"),
-        athlete => athlete
-      )}
-  }
-
-  def listAthleteKOMs(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[SegmentEffort]] = {
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms")
-      .withQueryString("page" -> page.iterator.next().toString)
-      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+  def findAthlete(id: String): Future[Athlete] = {
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id")
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-      response.json.validate[List[SegmentEffort]](segmentEffortReads).fold(
-        errors => throw new RuntimeException("Could not parse list of KOMs"),
-        koms => koms
-      )}
+        parse(response.body).extract[Athlete]
+    }
+  }
+
+  def listAthleteKOMs(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[SegmentEffort] = {
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms$params")
+      .withHeaders("Authorization" -> authString)
+      .get()
+      .map { response =>
+      println(response.json)
+      (parse(response.body) \ "id").extract[List[Long]]
+        parse(response.body).extract[SegmentEffort]
+      //println(koms.head)
+      //koms
+    }
   }
 
   def listCurrentAthleteFriends(page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
-    WS.url("https://www.strava.com/api/v3/athlete/friends")
-      .withQueryString("page" -> page.iterator.next().toString)
-      .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/athlete/friends$params")
+      .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-      response.json.validate[List[AthleteSummary]].fold(
-        errors => throw new RuntimeException("Could not parse list of friends (AthleteSummary)"),
-        friends => friends
-      )}
+        parse(response.body).extract[List[AthleteSummary]]
+    }
   }
 
   def listAthleteFriends(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
@@ -77,10 +83,8 @@ case class Connection (
       .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[List[AthleteSummary]].fold(
-        errors => throw new RuntimeException("Could not parse list of friends (AthleteSummary)"),
-        friends => friends
-      )}
+        parse(response.body).extract[List[AthleteSummary]]
+    }
   }
 
   def listCurrentAthleteFollowers(page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
@@ -89,10 +93,8 @@ case class Connection (
       .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[List[AthleteSummary]].fold(
-        errors => throw new RuntimeException("Could not parse list of followers (AthleteSummary)"),
-        followers => followers
-      )}
+        parse(response.body).extract[List[AthleteSummary]]
+    }
   }
 
   def listAthleteFollowers(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
@@ -101,10 +103,8 @@ case class Connection (
       .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[List[AthleteSummary]].fold(
-        errors => throw new RuntimeException("Could not parse list of followers (AthleteSummary)"),
-        followers => followers
-      )}
+        parse(response.body).extract[List[AthleteSummary]]
+    }
   }
 
   def listMutualFollowing(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
@@ -113,10 +113,12 @@ case class Connection (
       .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[List[AthleteSummary]].fold(
-        errors => throw new RuntimeException("Could not parse list of followers (AthleteSummary)"),
-        followers => followers
-      )}
+        parse(response.body).extract[List[AthleteSummary]]
+    }
+//      response.json.validate[List[AthleteSummary]].fold(
+//        errors => throw new RuntimeException("Could not parse list of followers (AthleteSummary)"),
+//        followers => followers
+//      )}
   }
 
   def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int, description: Option[String], distance: Option[Float]): Future[Activity] = {
@@ -130,10 +132,12 @@ case class Connection (
       "type" -> Seq(`type`)
     ))
       .map { response =>
-      response.json.validate[Activity].fold(
-        errors => throw new RuntimeException("Could not parse athlete"),
-        activity => activity
-      )}
+        parse(response.body).extract[Activity]
+    }
+//      response.json.validate[Activity].fold(
+//        errors => throw new RuntimeException("Could not parse athlete"),
+//        activity => activity
+//      )}
   }
 
   def retrieveActivity(id: Long, includeEfforts: Option[Boolean]): Future[Activity] = {
@@ -141,10 +145,12 @@ case class Connection (
       .withQueryString("include_all_efforts" -> includeEfforts.iterator.next().toString)
       .get()
       .map { response =>
-      response.json.validate[Activity](activityReads).fold(
-        errors => throw new RuntimeException("Could not parse activity"),
-        activity => activity
-      )}
+        parse(response.body).extract[Activity]
+    }
+//      response.json.validate[Activity](activityReads).fold(
+//        errors => throw new RuntimeException("Could not parse activity"),
+//        activity => activity
+//      )}
   }
 
   def updateActivity(
@@ -174,10 +180,12 @@ case class Connection (
       "gearId" -> Seq(gearId.get),
       "description" -> Seq(description.get)))
       .map { response =>
-      response.json.validate[Activity](activityReads).fold(
-        errors => throw new RuntimeException("Could not parse activity"),
-        activity => activity
-      )}
+        parse(response.body).extract[Activity]
+    }
+//      response.json.validate[Activity](activityReads).fold(
+//        errors => throw new RuntimeException("Could not parse activity"),
+//        activity => activity
+//      )}
   }
 
   def deleteActivity(id: Long): Future[Boolean] = {

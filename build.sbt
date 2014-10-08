@@ -10,5 +10,6 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
-  ws
+  ws,
+  "net.liftweb" %% "lift-json" % "3.0-M2"
 )

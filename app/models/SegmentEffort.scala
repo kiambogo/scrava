@@ -5,24 +5,21 @@ package models
  */
 case class SegmentEffort(
   id: Long,
-  resourceState: Int,
+  resource_state: Int,
   name: String,
-  activity: Activity,
-  athlete: Athlete,
-  elapsedTime: Int,
-  movingTime: Int,
-  startDate: String,
-  startDateLocal: String,
+  activity: Map[String,Int],
+  athlete: Map[String,Int],
+  elapsed_time: Int,
+  moving_time: Int,
+  start_date: String,
+  start_date_local: String,
   distance: Float,
-  startIndex: Int,
-  endIndex: Int,
-  averageCadence: Float,
-  averageWatts: Float,
-  averageHeartrate: Float,
-  maxHeartrate: Int,
-  segment: Segment,
-  KOMRank: Int,
-  PRRank: Int,
-  hidden: Boolean) {
+  start_index: Int,
+  end_index: Int,
+  average_heartrate: Float,
+  max_heartrate: Int,
+  segment: SegmentSummary,
+  kom_rank: Int,
+  pr_rank: Option[Int]) {
 
 }

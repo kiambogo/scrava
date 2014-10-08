@@ -5,36 +5,32 @@ package models
  */
 case class Athlete(
   id: Int,
-  resourceState: String,
-  athleteData: AthleteData,
+  resource_state: Int,
+  firstname: String,
+  lastname: String,
   profile_medium: String,
   profile: String,
-  friend: String,
-  follower: String,
+  city: String,
+  state: String,
+  country: String,
+  sex: String,
+  friend: Option[String],
+  follower: Option[String],
   premium: Boolean,
-  createdAt: String,
-  updatedAt: String,
-  approveFollowers: Boolean,
-  followerCount: Int,
-  friendCount: Int,
-  mutualFriendCount: Int,
-  datePreference: String,
-  measurementPreference: String,
+  created_at: String,
+  updated_at: String,
+  follower_count: Int,
+  friend_count: Int,
+  mutual_friend_count: Int,
+  date_preference: String,
+  measurement_preference: String,
   email: String,
-  ftp: Int,
+  ftp: Option[Int],
   clubs: List[Club],
   bikes: List[Gear],
   shoes: List[Gear]) {
 
 }
-
-case class AthleteData(
-  firstname: String,
-  lastname: String,
-  city: String,
-  state: String,
-  country: String,
-  sex: String )
 
 case class AthleteSummary(
   id:	Int,
@@ -51,9 +47,7 @@ case class AthleteSummary(
   follower:	String,
   premium:	Boolean,
   created_at: String,
-  updated_at: String,
-  approve_followers:	Boolean
-) {
+  updated_at: String) {
 
 }
 
