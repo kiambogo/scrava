@@ -54,4 +54,17 @@ object Application extends Controller {
   def wattsStream(id: String) = Action.async {
     client.getWattsStream(id).map(wattsStream => Ok(write(wattsStream)))
   }
+
+  def tempStream(id: String) = Action.async {
+    client.getTempStream(id).map(wattsStream => Ok(write(wattsStream)))
+  }
+
+  def movingStream(id: String) = Action.async {
+    client.getMovingStream(id).map(wattsStream => Ok(write(wattsStream)))
+  }
+
+  def gradeStream(id: String) = Action.async {
+    client.getGradeStream(id).map(wattsStream => Ok(write(wattsStream)))
+  }
+
 }

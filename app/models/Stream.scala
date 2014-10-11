@@ -20,102 +20,102 @@ case class VelocityStream(
   velocity: Velocity)
 
 case class HeartrateStream(
-  heartrate: Heartrate,
-  distance: Distance)
+  distance: Distance,
+  heartrate: Heartrate)
 
 case class CadenceStream(
-  cadence: Cadence,
-  distance: Distance)
+  distance: Distance,
+  cadence: Cadence)
 
 case class WattsStream(
- watts: Watts,
- distance: Distance)
+  distance: Distance,
+  watts: Watts)
 
 case class TempStream(
-  temp: Temp,
-  distance: Distance)
+  distance: Distance,
+  temp: Temp)
 
 case class MovingStream(
-  moving: Moving,
-  distance: Distance)
+  distance: Distance,
+  moving: Moving)
 
 case class GradeStream(
-  grade: Grade,
-  distance: Distance)
+  distance: Distance,
+  grade: Grade)
 
 case class LatLng(
-  `type`: String,
-  data: List[List[Float]],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "latlng",
+  data: List[List[Double]] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Distance(
-  `type`: String,
-  data: List[Float],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "distance",
+  data: List[Float] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Time(
-  `type`: String,
-  data: List[Int],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "time",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Altitude(
-  `type`: String,
-  data: List[Float],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "altitude",
+  data: List[Float] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Velocity(
-  `type`: String,
-  data: List[Float],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "velocity",
+  data: List[Float] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Heartrate(
-  `type`: String,
-  data: List[Int],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "heartrate",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Cadence(
-  `type`: String,
-  data: List[Int],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "cadence",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Watts(
-  `type`: String,
-  data: List[Int],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "watts",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Temp(
-  `type`: String,
-  data: List[Int],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "temp",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Moving(
-  `type`: String,
-  data: List[Boolean],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "moving",
+  data: List[Boolean] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")
 
 case class Grade(
-  `type`: String,
-  data: List[Float],
-  series_type: String,
-  original_size: Int,
-  resolution: String)
+  `type`: String = "grade_smooth",
+  data: List[Float] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high")

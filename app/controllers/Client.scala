@@ -23,13 +23,13 @@ class ScravaClient(accessToken: String) {
     WS.url("https://www.strava.com/api/v3/athlete")
       .withHeaders("Authorization" -> authString)
       .put(Map(
-        "city" -> Seq(city),
-        "state" -> Seq(state),
-        "country" -> Seq(country),
-        "sex" -> Seq(sex),
-        "weight" -> Seq(weight.toString)))
+      "city" -> Seq(city),
+      "state" -> Seq(state),
+      "country" -> Seq(country),
+      "sex" -> Seq(sex),
+      "weight" -> Seq(weight.toString)))
       .map { response =>
-        parse(response.body).extract[Athlete] }
+      parse(response.body).extract[Athlete] }
   }
 
   def findAthlete(id: String): Future[Athlete] = {
@@ -37,7 +37,7 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        parse(response.body).extract[Athlete]
+      parse(response.body).extract[Athlete]
     }
   }
 
@@ -54,7 +54,7 @@ class ScravaClient(accessToken: String) {
       .map { response =>
       println(response.json)
       (parse(response.body) \ "id").extract[List[Long]]
-        parse(response.body).extract[SegmentEffort]
+      parse(response.body).extract[SegmentEffort]
       //println(koms.head)
       //koms
     }
@@ -71,7 +71,7 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -86,7 +86,7 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -101,7 +101,7 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -116,7 +116,7 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -126,7 +126,7 @@ class ScravaClient(accessToken: String) {
       .withQueryString("per_page" -> resultsPerPage.iterator.next().toString)
       .get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -141,7 +141,7 @@ class ScravaClient(accessToken: String) {
       "type" -> Seq(`type`)
     ))
       .map { response =>
-        parse(response.body).extract[Activity]
+      parse(response.body).extract[Activity]
     }
   }
 
@@ -150,19 +150,19 @@ class ScravaClient(accessToken: String) {
       .withQueryString("include_all_efforts" -> includeEfforts.iterator.next().toString)
       .get()
       .map { response =>
-        parse(response.body).extract[Activity]
+      parse(response.body).extract[Activity]
     }
   }
 
   def updateActivity(
-    id: Long,
-    name: Option[String],
-    `type`: Option[String],
-    `private`: Option[Boolean],
-    commute: Option[Boolean],
-    trainer: Option[Boolean],
-    gearId: Option[String],
-    description: Option[String]): Future[Activity] = {
+  id: Long,
+  name: Option[String],
+  `type`: Option[String],
+  `private`: Option[Boolean],
+  commute: Option[Boolean],
+  trainer: Option[Boolean],
+  gearId: Option[String],
+  description: Option[String]): Future[Activity] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .withQueryString("name" -> name.iterator.next())
       .withQueryString("type" -> `type`.iterator.next())
@@ -181,7 +181,7 @@ class ScravaClient(accessToken: String) {
       "gearId" -> Seq(gearId.get),
       "description" -> Seq(description.get)))
       .map { response =>
-        parse(response.body).extract[Activity]
+      parse(response.body).extract[Activity]
     }
   }
 
@@ -189,11 +189,9 @@ class ScravaClient(accessToken: String) {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .delete()
       .map { response =>
-        response.status.equals(204)
+      response.status.equals(204)
     }
   }
-
-
 
   def getTimeStream(id: String): Future[TimeStream] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/time")
@@ -201,7 +199,7 @@ class ScravaClient(accessToken: String) {
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-        TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
+      TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
     }
   }
 
@@ -211,7 +209,14 @@ class ScravaClient(accessToken: String) {
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      LatLngStream((parse(response.body))(0).extract[LatLng], (parse(response.body))(1).extract[Distance])
+      if (parse(response.body).children.size > 1) {
+        val latlngData = parse(response.body).children(0).extract[LatLng]
+        val distanceData = parse(response.body).children(1).extract[Distance]
+        LatLngStream(latlngData, distanceData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        LatLngStream(LatLng(), distanceData)
+      }
     }
   }
 
@@ -221,7 +226,14 @@ class ScravaClient(accessToken: String) {
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      AltitudeStream((parse(response.body))(0).extract[Distance], (parse(response.body))(1).extract[Altitude])
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val altitudeData = parse(response.body).children(1).extract[Altitude]
+        AltitudeStream(distanceData, altitudeData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        AltitudeStream(distanceData, Altitude())
+      }
     }
   }
 
@@ -231,37 +243,115 @@ class ScravaClient(accessToken: String) {
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      VelocityStream((parse(response.body))(0).extract[Distance], (parse(response.body))(1).extract[Velocity])
-    }
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val velocityData = parse(response.body).children(1).extract[Velocity]
+        VelocityStream(distanceData, velocityData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        VelocityStream(distanceData, Velocity())
+      }    }
   }
 
   def getHeartRateStream(id: String): Future[HeartrateStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/heartrate")
       .withHeaders("Authorization" -> authString)
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      HeartrateStream((parse(response.body))(0).extract[Heartrate], (parse(response.body))(1).extract[Distance])
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val heartData = parse(response.body).children(1).extract[Heartrate]
+        HeartrateStream(distanceData, heartData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        HeartrateStream(distanceData, Heartrate())
+      }
     }
   }
 
   def getCadenceStream(id: String): Future[CadenceStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/cadence")
       .withHeaders("Authorization" -> authString)
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      CadenceStream((parse(response.body))(0).extract[Cadence], (parse(response.body))(1).extract[Distance])
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val cadenceData = parse(response.body).children(1).extract[Cadence]
+        CadenceStream(distanceData, cadenceData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        CadenceStream(distanceData, Cadence())
+      }
     }
   }
 
   def getWattsStream(id: String): Future[WattsStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/watts")
       .withHeaders("Authorization" -> authString)
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      WattsStream((parse(response.body))(0).extract[Watts], (parse(response.body))(1).extract[Distance])
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val wattsData = parse(response.body).children(1).extract[Watts]
+        WattsStream(distanceData, wattsData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        WattsStream(distanceData, Watts())
+      }
+    }
+  }
+
+  def getTempStream(id: String): Future[TempStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/temp")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("low")))
+      .get()
+      .map { response =>
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val tempData = parse(response.body).children(1).extract[Temp]
+        TempStream(distanceData, tempData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        TempStream(distanceData, Temp())
+      }
+    }
+  }
+
+  def getMovingStream(id: String): Future[MovingStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/moving")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val movingData = parse(response.body).children(1).extract[Moving]
+        MovingStream(distanceData, movingData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        MovingStream(distanceData, Moving())
+      }
+    }
+  }
+
+  def getGradeStream(id: String): Future[GradeStream] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/grade_smooth")
+      .withHeaders("Authorization" -> authString)
+      .withBody(Map("resolution" -> Seq("high")))
+      .get()
+      .map { response =>
+      if (parse(response.body).children.size > 1) {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        val gradeData = parse(response.body).children(1).extract[Grade]
+        GradeStream(distanceData, gradeData)
+      } else {
+        val distanceData = parse(response.body).children(0).extract[Distance]
+        GradeStream(distanceData, Grade())
+      }
     }
   }
 }
