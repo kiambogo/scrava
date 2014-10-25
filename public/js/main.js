@@ -32,6 +32,16 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
             })
     };
 
+    $scope.retrieveActivity = function(id) {
+        $http.get('/activity/'+id).
+            success(function(data) {
+              console.log(data);
+            }).
+            error(function(e) {
+                console.log("Error fetching activity: " + e);
+            })
+    };
+
     $scope.getTimeStream = function() {
         $http.get('204773031/streams/time').
             success(function(data) {

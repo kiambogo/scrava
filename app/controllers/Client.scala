@@ -10,6 +10,8 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Play.current
 import play.api.libs.ws.WS
+import play.api.Logger._
+import play.api.libs.ws.ning.NingWSRequestHolder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,6 +20,26 @@ class ScravaClient(accessToken: String) {
 
   implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
+
+  // Athlete-Related Functions
+
+  def retreiveCurrentAthlete(): Future[Athlete] = {
+    WS.url(s"https://www.strava.com/api/v3/athlete")
+      .withHeaders("Authorization" -> authString)
+      .get()
+      .map { response =>
+      parse(response.body).extract[Athlete]
+    }
+  }
+
+  def retreiveAthlete(id: String): Future[AthleteSummary] = {
+    WS.url(s"https://www.strava.com/api/v3/athletes/$id")
+      .withHeaders("Authorization" -> authString)
+      .get()
+      .map { response =>
+      parse(response.body).extract[AthleteSummary]
+    }
+  }
 
   def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): Future[Athlete] = {
     WS.url("https://www.strava.com/api/v3/athlete")
@@ -32,31 +54,13 @@ class ScravaClient(accessToken: String) {
       parse(response.body).extract[Athlete] }
   }
 
-  def findAthlete(id: String): Future[Athlete] = {
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id")
-      .withHeaders("Authorization" -> authString)
-      .get()
-      .map { response =>
-      parse(response.body).extract[Athlete]
-    }
-  }
-
-  def listAthleteKOMs(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[SegmentEffort] = {
-    val params = StringBuilder.newBuilder
-    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
-    if (page.isDefined) params.append("page=").append(page.get.toString)
-    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
-    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
-
-    WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms$params")
-      .withHeaders("Authorization" -> authString)
-      .get()
-      .map { response =>
-      println(response.json)
-      (parse(response.body) \ "id").extract[List[Long]]
-      parse(response.body).extract[SegmentEffort]
-      //println(koms.head)
-      //koms
+  def listAthleteKOMs(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[SegmentEffort]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Int]]("page" -> page, "resultsPerPage" -> resultsPerPage)
+    tempMap.map(params => params._2 map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+      request.get()
+        .map { response =>
+          parse(response.body).extract[List[SegmentEffort]]
     }
   }
 
@@ -75,7 +79,7 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listAthleteFriends(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
+  def listAthleteFriends(id: String, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
     val params = StringBuilder.newBuilder
     if (page.isDefined || resultsPerPage.isDefined) params.append("?")
     if (page.isDefined) params.append("page=").append(page.get.toString)
@@ -130,6 +134,45 @@ class ScravaClient(accessToken: String) {
     }
   }
 
+  // Activity-Related Functions
+
+  def listActivityComments(id: String, page: Option[Int], resultsPerPage: Option[Int]): Future[List[ActivityComments]] = {
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/comments$params")
+    .get()
+    .map { response =>
+      parse(response.body).extract[List[ActivityComments]]
+    }
+  }
+
+  def listActivityKudoers(id: Int, page: Option[Int], resultsPerPage: Option[Int]): Future[List[AthleteSummary]] = {
+    val params = StringBuilder.newBuilder
+    if (page.isDefined || resultsPerPage.isDefined) params.append("?")
+    if (page.isDefined) params.append("page=").append(page.get.toString)
+    if (page.isDefined && resultsPerPage.isDefined) params.append("&per_page=").append(resultsPerPage.get.toString)
+    else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/kudos$params")
+      .get()
+      .map { response =>
+      parse(response.body).extract[List[AthleteSummary]]
+    }
+  }
+
+  def listActivityPhotos(id: String): Future[List[Photo]] = {
+    WS.url(s"https://www.strava.com/api/v3/activities/$id/photos")
+      .withQueryString()
+      .get()
+      .map { response =>
+        parse(response.body).extract[List[Photo]]
+    }
+  }
+
   def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int, description: Option[String], distance: Option[Float]): Future[Activity] = {
     WS.url("https://www.strava.com/api/v3/activities")
       .withHeaders("Authorization" -> authString)
@@ -141,16 +184,26 @@ class ScravaClient(accessToken: String) {
       "type" -> Seq(`type`)
     ))
       .map { response =>
+      println(response.json)
       parse(response.body).extract[Activity]
     }
   }
 
-  def retrieveActivity(id: Long, includeEfforts: Option[Boolean]): Future[Activity] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id")
-      .withQueryString("include_all_efforts" -> includeEfforts.iterator.next().toString)
+  def retrieveActivity(id: Long, includeEfforts: Option[Boolean]): Future[Either[Activity, ActivitySummary]] = {
+    val params = StringBuilder.newBuilder
+    if (includeEfforts.isDefined) params.append("?").append(includeEfforts.get.toString)
+
+    WS.url(s"https://www.strava.com/api/v3/activities/$id$params")
+      .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-      parse(response.body).extract[Activity]
+        println(response.body)
+        val activityOpt = parse(response.body).extractOpt[Activity]
+        if (activityOpt.isDefined) {
+          Left(activityOpt.get)
+        } else {
+          Right(parse(response.body).extract[ActivitySummary])
+        }
     }
   }
 
@@ -193,13 +246,54 @@ class ScravaClient(accessToken: String) {
     }
   }
 
+  def listCurrentAthleteActivities(before: Option[String], after: Option[String], page: Option[String], per_page: Option[String]): Future[List[PersonalActivitySummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/athlete/activities").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[String]]("before" -> before, "after" -> after, "page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2 map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
+    debug(request.queryString.toString)
+      request.get()
+      .map { response =>
+        parse(response.body).extract[List[PersonalActivitySummary]]
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   def getTimeStream(id: String): Future[TimeStream] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/time")
       .withHeaders("Authorization" -> authString)
       .withBody(Map("resolution" -> Seq("high")))
       .get()
       .map { response =>
-      TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
+        TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
     }
   }
 

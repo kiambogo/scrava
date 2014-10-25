@@ -6,7 +6,14 @@
 GET     /                               controllers.Application.index
 GET     /athlete/                       controllers.Application.athlete
 GET     /koms/                          controllers.Application.koms
-GET     /friends/                       controllers.Application.friends
+GET     /friends/                       controllers.Application.currentFriends
+GET     /friends/:id                    controllers.Application.friends(id)
+
+#Activities
+GET     /activities/                    controllers.Application.myActivities
+GET     /activity/:id                   controllers.Application.activity(id)
+POST    /activity/                      controllers.Application.createActivity()
+
 
 
 #Streams

@@ -4,7 +4,7 @@ package models
  * Created by christopher on 2014-09-15.
  */
 case class SegmentEffort(
-  id: Long,
+  id: Int,
   resource_state: Int,
   name: String,
   activity: Map[String,Int],
@@ -19,7 +19,7 @@ case class SegmentEffort(
   average_heartrate: Float,
   max_heartrate: Int,
   segment: SegmentSummary,
-  kom_rank: Int,
+  kom_rank: Option[Int],
   pr_rank: Option[Int]) {
 
 }

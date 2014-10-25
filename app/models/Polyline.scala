@@ -5,8 +5,8 @@ package models
  */
 case class Polyline(
   id: String,
-  polyline: String,
+  polyline: Option[String],
   summary_polyline: String,
-  resource_state: String) {
+  resource_state: Int) {
 
 }
