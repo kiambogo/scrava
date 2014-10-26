@@ -12,7 +12,7 @@ case class Gear(
   brand_name: Option[String],
   model_name: Option[String],
   frame_type: Option[String],
-  description: String,
+  description: Option[String],
   resource_state: Int)
 
 case class GearSummary(

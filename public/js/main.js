@@ -3,7 +3,7 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
     var accessToken = "";
 
     $scope.getAthlete = function() {
-        $http.get('/athlete/').
+        $http.get('/athlete').
             success(function(data) {
             	console.log(data);
             }).
@@ -13,7 +13,7 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
     };
 
     $scope.listKOMS = function() {
-        $http.get('/koms/').
+        $http.get('/athlete/koms').
             success(function(data) {
             	console.log(data);
             }).
@@ -23,7 +23,7 @@ main.controller('trifectaController', ['$scope', '$http', '$timeout', function($
     };
 
     $scope.listFriends = function() {
-        $http.get('/friends/').
+        $http.get('/athlete/friends').
             success(function(data) {
               console.log(data);
             }).

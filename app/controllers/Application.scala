@@ -21,32 +21,32 @@ object Application extends Controller {
       .map(activity => Ok(write(activity)))
   }
 
-  def activity(id: String) = Action.async {
-    client.retrieveActivity(id.toLong, None).map(activity => Ok(write(activity.merge)))
+  def activity(id: Int) = Action.async {
+    client.retrieveActivity(id).map(activity => Ok(write(activity.merge)))
+  }
+
+  def activityComments(id: Int) = Action.async {
+    client.listActivityComments(id).map(comments => Ok(write(comments)))
   }
 
   def myActivities= Action.async {
-    client.listCurrentAthleteActivities(None, None, None, None).map(activities => Ok(write(activities)))
+    client.listAthleteActivities().map(activities => Ok(write(activities)))
   }
 
   def friendsActivities= Action.async {
-    client.listFriendsActivities(None, None).map(activities => Ok(write(activities)))
+    client.listFriendsActivities().map(activities => Ok(write(activities)))
   }
 
   def athlete = Action.async {
-    client.retreiveCurrentAthlete().map(athlete => Ok(write(athlete)))
+    client.retrieveAthlete(Some(5250729)).map(athlete => Ok(write(athlete.merge)))
   }
 
   def koms = Action.async {
-    client.listAthleteKOMs(1271201,None,None).map(koms => Ok(write(koms)))
+    client.listAthleteKOMs(Some(5250729)).map(koms => Ok(write(koms)))
   }
 
-  def currentFriends = Action.async {
-    client.listCurrentAthleteFriends(None,None).map(friends => Ok(write(friends)))
-  }
-
-  def friends(id: String) = Action.async {
-    client.listAthleteFriends(id, None, None).map(friends => Ok(write(friends)))
+  def friends() = Action.async {
+    client.listAthleteFriends().map(friends => Ok(write(friends)))
   }
 
   def activityStreams = Action.async {

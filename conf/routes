@@ -4,16 +4,17 @@
 
 # Home page
 GET     /                               controllers.Application.index
-GET     /athlete/                       controllers.Application.athlete
-GET     /koms/                          controllers.Application.koms
-GET     /friends/                       controllers.Application.currentFriends
-GET     /friends/:id                    controllers.Application.friends(id)
+GET     /athlete                        controllers.Application.athlete
+GET     /athlete/koms                   controllers.Application.koms
+GET     /athlete/friends                controllers.Application.friends
+
+#Activity
+GET     /activity/:id                  controllers.Application.activity(id: Int)
+GET     /activity/:id/comments         controllers.Application.activityComments(id: Int)
 
 #Activities
-GET     /activities/                    controllers.Application.myActivities
-GET     /activities/friends             controllers.Application.friendsActivities
-GET     /activity/:id                   controllers.Application.activity(id)
-POST    /activity/                      controllers.Application.createActivity()
+GET     /activities                    controllers.Application.myActivities
+GET     /activities/friends            controllers.Application.friendsActivities
 
 
 

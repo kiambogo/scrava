@@ -3,7 +3,7 @@ package models
 /**
  * Created by christopher on 2014-10-07.
  */
-trait Streams
+sealed trait Streams
 
 case class LatLng(
   `type`: String = "latlng",
