@@ -49,44 +49,15 @@ object Application extends Controller {
     client.listAthleteFriends(id, None, None).map(friends => Ok(write(friends)))
   }
 
-  def timeStream(id: String) = Action.async {
-    client.getTimeStream(id).map(timeStream => Ok(write(timeStream)))
+  def activityStreams = Action.async {
+    client.retrieveActivityStream("206688393", Some("time,latlng")).map(timeStream => Ok(write(timeStream)))
   }
 
-  def latlngStream(id: String) = Action.async {
-    client.getLatLngStream(id).map(latlngStream => Ok(write(latlngStream)))
+  def segmentStreams = Action.async {
+    client.retrieveSegmentStream("1089606", Some("time,latlng")).map(timeStream => Ok(write(timeStream)))
   }
 
-  def altitudeStream(id: String) = Action.async {
-    client.getAltitudeStream(id).map(altitudeStream => Ok(write(altitudeStream)))
+  def effortStreams = Action.async {
+    client.retrieveEffortStream("206688393", Some("time,latlng")).map(timeStream => Ok(write(timeStream)))
   }
-
-  def velocityStream(id: String) = Action.async {
-    client.getVelocityStream(id).map(velocityStream => Ok(write(velocityStream)))
-  }
-
-  def heartrateStream(id: String) = Action.async {
-    client.getHeartRateStream(id).map(heartrateStream => Ok(write(heartrateStream)))
-  }
-
-  def cadenceStream(id: String) = Action.async {
-    client.getCadenceStream(id).map(cadenceStream => Ok(write(cadenceStream)))
-  }
-
-  def wattsStream(id: String) = Action.async {
-    client.getWattsStream(id).map(wattsStream => Ok(write(wattsStream)))
-  }
-
-  def tempStream(id: String) = Action.async {
-    client.getTempStream(id).map(wattsStream => Ok(write(wattsStream)))
-  }
-
-  def movingStream(id: String) = Action.async {
-    client.getMovingStream(id).map(wattsStream => Ok(write(wattsStream)))
-  }
-
-  def gradeStream(id: String) = Action.async {
-    client.getGradeStream(id).map(wattsStream => Ok(write(wattsStream)))
-  }
-
 }

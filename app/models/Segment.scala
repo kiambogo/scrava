@@ -62,6 +62,18 @@ case class SegmentSummary(
   athlete_pr_effort: Option[PREffort],
   starred_date: Option[String])
 
+case class SegmentCondensed(
+  id: Int,
+  name: String,
+  climb_category: Int,
+  climb_category_desc: String,
+  avg_grade: Float,
+  start_latlng: List[Float],
+  end_latlng: List[Float],
+  elev_difference: Float,
+  distance: Float,
+  points: String)
+
 case class SegmentLeaderBoards(
   entry_count: Int,
   entries: List[LeaderBoardEntry])

@@ -10,6 +10,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger._
 import play.api.Play.current
+import play.api.libs.json.{JsValue, JsArray}
 import play.api.libs.ws.WS
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,9 +58,9 @@ class ScravaClient(accessToken: String) {
     var request = WS.url(s"https://www.strava.com/api/v3/athletes/$id/koms").withHeaders("Authorization" -> authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "resultsPerPage" -> resultsPerPage)
     tempMap.map(params => params._2 map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
-      request.get()
-        .map { response =>
-          parse(response.body).extract[List[SegmentEffort]]
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[SegmentEffort]]
     }
   }
 
@@ -143,8 +144,8 @@ class ScravaClient(accessToken: String) {
     else if (resultsPerPage.isDefined) params.append("per_page").append(resultsPerPage.get.toString)
 
     WS.url(s"https://www.strava.com/api/v3/activities/$id/comments$params")
-    .get()
-    .map { response =>
+      .get()
+      .map { response =>
       parse(response.body).extract[List[ActivityComments]]
     }
   }
@@ -168,7 +169,7 @@ class ScravaClient(accessToken: String) {
       .withQueryString()
       .get()
       .map { response =>
-        parse(response.body).extract[List[Photo]]
+      parse(response.body).extract[List[Photo]]
     }
   }
 
@@ -196,25 +197,25 @@ class ScravaClient(accessToken: String) {
       .withHeaders("Authorization" -> authString)
       .get()
       .map { response =>
-        println(response.body)
-        val activityOpt = parse(response.body).extractOpt[Activity]
-        if (activityOpt.isDefined) {
-          Left(activityOpt.get)
-        } else {
-          Right(parse(response.body).extract[ActivitySummary])
-        }
+      println(response.body)
+      val activityOpt = parse(response.body).extractOpt[Activity]
+      if (activityOpt.isDefined) {
+        Left(activityOpt.get)
+      } else {
+        Right(parse(response.body).extract[ActivitySummary])
+      }
     }
   }
 
   def updateActivity(
-  id: Long,
-  name: Option[String],
-  `type`: Option[String],
-  `private`: Option[Boolean],
-  commute: Option[Boolean],
-  trainer: Option[Boolean],
-  gearId: Option[String],
-  description: Option[String]): Future[Activity] = {
+                      id: Long,
+                      name: Option[String],
+                      `type`: Option[String],
+                      `private`: Option[Boolean],
+                      commute: Option[Boolean],
+                      trainer: Option[Boolean],
+                      gearId: Option[String],
+                      description: Option[String]): Future[Activity] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .withQueryString("name" -> name.iterator.next())
       .withQueryString("type" -> `type`.iterator.next())
@@ -250,9 +251,9 @@ class ScravaClient(accessToken: String) {
     val tempMap = Map[String, Option[String]]("before" -> before, "after" -> after, "page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
     debug(request.queryString.toString)
-      request.get()
+    request.get()
       .map { response =>
-        parse(response.body).extract[List[PersonalActivitySummary]]
+      parse(response.body).extract[List[PersonalActivitySummary]]
     }
   }
 
@@ -270,7 +271,7 @@ class ScravaClient(accessToken: String) {
     val request = WS.url(s"https://www.strava.com/api/v3/activities/$id/zones").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-        parse(response.body).extract[ActivityZones]
+      parse(response.body).extract[ActivityZones]
     }
   }
 
@@ -304,7 +305,7 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-        parse(response.body).extract[List[AthleteSummary]]
+      parse(response.body).extract[List[AthleteSummary]]
     }
   }
 
@@ -378,201 +379,76 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  def getTimeStream(id: String): Future[TimeStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/time")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
+  def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): Future[SegmentCondensed] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/segments/explore").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "min_cat" -> min_cat, "max_cat" -> max_cat)
+    request = request.withQueryString("bounds" -> bounds.mkString(","))
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
       .map { response =>
-        TimeStream((parse(response.body))(0).extract[Time], (parse(response.body))(1).extract[Distance])
+      parse(response.body).extract[SegmentCondensed]
     }
   }
 
-  def getLatLngStream(id: String): Future[LatLngStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/latlng")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
+  def retrieveSegmentEffort(effort_id: BigInt): Future[SegmentEffort] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/segment_efforts/$effort_id").withHeaders("Authorization" -> authString)
+    request.get()
       .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val latlngData = parse(response.body).children(0).extract[LatLng]
-        val distanceData = parse(response.body).children(1).extract[Distance]
-        LatLngStream(latlngData, distanceData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        LatLngStream(LatLng(), distanceData)
-      }
+      parse(response.body).extract[SegmentEffort]
     }
   }
 
-  def getAltitudeStream(id: String): Future[AltitudeStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/altitude")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
+  def retrieveActivityStream(activity_id: String, stream_types: Option[String] = None): Future[List[Streams]] = {
+    val types = if (!stream_types.isDefined) {
+      "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
+    } else { stream_types.get }
+    WS.url(s"https://www.strava.com/api/v3/activities/$activity_id/streams/"+types).withHeaders("Authorization" -> authString)
+      .withQueryString("resolution" -> "high")
       .get()
       .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val altitudeData = parse(response.body).children(1).extract[Altitude]
-        AltitudeStream(distanceData, altitudeData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        AltitudeStream(distanceData, Altitude())
-      }
+      response.json.as[List[JsValue]].map(parseStream(_))
     }
   }
 
-  def getVelocityStream(id: String): Future[VelocityStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/velocity_smooth")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
+  def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): Future[List[Streams]] = {
+    val types = if (!stream_types.isDefined) {
+      "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
+    } else { stream_types.get }
+    WS.url(s"https://www.strava.com/api/v3/segment_efforts/$effort_id/streams/"+types).withHeaders("Authorization" -> authString)
+      .withQueryString("resolution" -> "high")
       .get()
       .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val velocityData = parse(response.body).children(1).extract[Velocity]
-        VelocityStream(distanceData, velocityData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        VelocityStream(distanceData, Velocity())
-      }    }
-  }
-
-  def getHeartRateStream(id: String): Future[HeartrateStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/heartrate")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
-      .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val heartData = parse(response.body).children(1).extract[Heartrate]
-        HeartrateStream(distanceData, heartData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        HeartrateStream(distanceData, Heartrate())
-      }
+      response.json.as[List[JsValue]].map(parseStream(_))
     }
   }
 
-  def getCadenceStream(id: String): Future[CadenceStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/cadence")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
+  def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): Future[List[Streams]] = {
+    val types = if (!stream_types.isDefined) {
+      "latlng,distance,altitude"
+    } else { stream_types.get }
+    WS.url(s"https://www.strava.com/api/v3/segments/$segment_id/streams/"+types).withHeaders("Authorization" -> authString)
+      .withQueryString("resolution" -> "high")
       .get()
       .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val cadenceData = parse(response.body).children(1).extract[Cadence]
-        CadenceStream(distanceData, cadenceData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        CadenceStream(distanceData, Cadence())
-      }
+      response.json.as[List[JsValue]].map(parseStream(_))
     }
   }
 
-  def getWattsStream(id: String): Future[WattsStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/watts")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
-      .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val wattsData = parse(response.body).children(1).extract[Watts]
-        WattsStream(distanceData, wattsData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        WattsStream(distanceData, Watts())
-      }
-    }
-  }
-
-  def getTempStream(id: String): Future[TempStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/temp")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("low")))
-      .get()
-      .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val tempData = parse(response.body).children(1).extract[Temp]
-        TempStream(distanceData, tempData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        TempStream(distanceData, Temp())
-      }
-    }
-  }
-
-  def getMovingStream(id: String): Future[MovingStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/moving")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
-      .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val movingData = parse(response.body).children(1).extract[Moving]
-        MovingStream(distanceData, movingData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        MovingStream(distanceData, Moving())
-      }
-    }
-  }
-
-  def getGradeStream(id: String): Future[GradeStream] = {
-    WS.url(s"https://www.strava.com/api/v3/activities/$id/streams/grade_smooth")
-      .withHeaders("Authorization" -> authString)
-      .withBody(Map("resolution" -> Seq("high")))
-      .get()
-      .map { response =>
-      if (parse(response.body).children.size > 1) {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        val gradeData = parse(response.body).children(1).extract[Grade]
-        GradeStream(distanceData, gradeData)
-      } else {
-        val distanceData = parse(response.body).children(0).extract[Distance]
-        GradeStream(distanceData, Grade())
-      }
+  def parseStream(streamData: JsValue): Streams = {
+    val dataType = streamData.\("type").toString
+    val dataStr = streamData.toString()
+    dataType.replace("\"","") match {
+      case "time" => parse(dataStr).extract[Time]
+      case "latlng" => parse(streamData.toString).extract[LatLng]
+      case "distance" => parse(streamData.toString).extract[Distance]
+      case "altitude" => parse(streamData.toString).extract[Altitude]
+      case "velocity_smooth" => parse(streamData.toString).extract[Velocity]
+      case "heartrate" => parse(streamData.toString).extract[Heartrate]
+      case "cadence" => parse(streamData.toString).extract[Cadence]
+      case "watts" => parse(streamData.toString).extract[Watts]
+      case "temp" => parse(streamData.toString).extract[Temp]
+      case "moving" => parse(streamData.toString).extract[Moving]
+      case "grade_smooth" => parse(streamData.toString).extract[Grade]
     }
   }
 }
