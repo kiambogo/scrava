@@ -16,8 +16,8 @@ case class SegmentEffort(
   distance: Float,
   start_index: Int,
   end_index: Int,
-  average_heartrate: Float,
-  max_heartrate: Int,
+  average_heartrate: Option[Float],
+  max_heartrate: Option[Int],
   segment: SegmentSummary,
   kom_rank: Option[Int],
   pr_rank: Option[Int]) {

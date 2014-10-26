@@ -4,7 +4,7 @@ package models
  * Created by christopher on 2014-09-15.
  */
 case class Segment(
-  id: Long,
+  id: Int,
   resource_state: Int,
   name: String,
   activity_type: String,
@@ -34,12 +34,10 @@ case class Segment(
   PRTime: Int,
   PRDistance: Float,
   starred: Boolean,
-  climbCategoryDesc: String) {
-
-}
+  climbCategoryDesc: String)
 
 case class SegmentSummary(
-  id: Long,
+  id: Int,
   resource_state: Int,
   name: String,
   activity_type: String,
@@ -59,6 +57,27 @@ case class SegmentSummary(
   state: String,
   country: String,
   `private`: Boolean,
-  starred: Boolean) {
+  starred: Boolean,
+  pr_time: Option[Int],
+  athlete_pr_effort: Option[PREffort],
+  starred_date: Option[String])
 
-}
+case class SegmentLeaderBoards(
+  entry_count: Int,
+  entries: List[LeaderBoardEntry])
+
+case class LeaderBoardEntry(
+  athlete_name: String,
+  athlete_id: Int,
+  athlete_gender: String,
+  average_hr: Option[Float],
+  average_watts: Float,
+  distance: Float,
+  elapsed_time: Int,
+  moving_time: Int,
+  start_date: String,
+  start_date_local: String,
+  activity_id: Int,
+  effort_id: Int,
+  rank: Int,
+  athlete_profile: String)

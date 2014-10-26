@@ -27,10 +27,8 @@ case class Athlete(
   email: String,
   ftp: Option[Int],
   clubs: List[ClubSummary],
-  bikes: List[Gear],
-  shoes: List[Gear]) {
-
-}
+  bikes: List[GearSummary],
+  shoes: List[GearSummary])
 
 case class AthleteSummary(
   id:	Int,
@@ -47,7 +45,12 @@ case class AthleteSummary(
   follower:	String,
   premium:	Boolean,
   created_at: String,
-  updated_at: String) {
+  updated_at: String)
 
-}
-
+case class PREffort(
+  id: Int,
+  elapsed_time: Int,
+  distance: Float,
+  start_date: String,
+  start_date_local: String,
+  is_kom: Boolean)

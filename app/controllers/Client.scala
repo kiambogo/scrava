@@ -274,29 +274,113 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listActivityLaps(id: String): Future[List[LapEffort]] = {
-    val request = WS.url(s"https://www.strava.com/api/v3/activities/$id/laps").withHeaders("Authorization" -> authString)
+  def listActivityLaps(activity_id: String): Future[List[LapEffort]] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/activities/$activity_id/laps").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
       parse(response.body).extract[List[LapEffort]]
     }
   }
 
-  def retrieveClub(id: String): Future[Club] = {
-    val request = WS.url(s"https://www.strava.com/api/v3/clubs/$id").withHeaders("Authorization" -> authString)
+  def retrieveClub(club_id: String): Future[Club] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/clubs/$club_id").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
       parse(response.body).extract[Club]
     }
   }
 
-  def listAthleteClubs(id: String): Future[List[ClubSummary]] = {
+  def listAthleteClubs: Future[List[ClubSummary]] = {
     val request = WS.url(s"https://www.strava.com/api/v3/athlete/clubs").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
       parse(response.body).extract[List[ClubSummary]]
     }
   }
+
+  def listClubMembers(club_id: String, page: Option[Int], per_page: Option[Int]): Future[List[AthleteSummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/clubs/$club_id/members").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+        parse(response.body).extract[List[AthleteSummary]]
+    }
+  }
+
+  def listClubActivities(club_id: String, page: Option[Int], per_page: Option[Int]): Future[List[ActivitySummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/clubs/$club_id/activities").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[ActivitySummary]]
+    }
+  }
+
+  def retrieveAthleteGear(gear_id: String): Future[List[Gear]] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/gear/$gear_id").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[Gear]]
+    }
+  }
+
+  def retrieveSegment(segment_id: String): Future[Segment] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/segments/$segment_id").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+      parse(response.body).extract[Segment]
+    }
+  }
+
+  def listAthleteStarredSegments(page: Option[Int], per_page: Option[Int]): Future[List[SegmentSummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/segments/starred").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[SegmentSummary]]
+    }
+  }
+
+  def listStarredSegments(athlete_id: String, page: Option[Int], per_page: Option[Int]): Future[List[SegmentSummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/clubs/$athlete_id/activities").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[SegmentSummary]]
+    }
+  }
+
+  def listEfforts(segment_id: String, athlete_id: Option[String], start_date_local: Option[DateTime],
+                  end_date_local: Option[DateTime], page: Option[Int], per_page: Option[Int]): Future[List[SegmentEffort]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/segments/$segment_id/all_efforts").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Any]]("start_date_local" -> start_date_local, "end_date_local" -> end_date_local, "page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[SegmentEffort]]
+    }
+  }
+
+  def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String],
+                              weight_class: Option[String], following: Option[Boolean], club_id: Option[Int],
+                              date_range: Option[String], page: Option[Int], per_page: Option[Int]): Future[SegmentLeaderBoards] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/segments/$segment_id/leaderboard").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Any]]("gender" -> gender, "age_group" -> age_group, "weight_class" -> weight_class,
+      "following" -> following, "club_id" -> club_id, "date_range" -> date_range, "page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[SegmentLeaderBoards]
+    }
+  }
+
+
+
+
 
 
 
