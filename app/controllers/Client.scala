@@ -8,10 +8,9 @@ import models._
 import net.liftweb.json._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.Logger._
 import play.api.Play.current
 import play.api.libs.ws.WS
-import play.api.Logger._
-import play.api.libs.ws.ning.NingWSRequestHolder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -249,13 +248,57 @@ class ScravaClient(accessToken: String) {
   def listCurrentAthleteActivities(before: Option[String], after: Option[String], page: Option[String], per_page: Option[String]): Future[List[PersonalActivitySummary]] = {
     var request = WS.url(s"https://www.strava.com/api/v3/athlete/activities").withHeaders("Authorization" -> authString)
     val tempMap = Map[String, Option[String]]("before" -> before, "after" -> after, "page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2 map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
     debug(request.queryString.toString)
       request.get()
       .map { response =>
         parse(response.body).extract[List[PersonalActivitySummary]]
     }
   }
+
+  def listFriendsActivities(page: Option[String], per_page: Option[String]): Future[List[ActivitySummary]] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/activities/following").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[String]]("page" -> page, "per_page" -> per_page)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[ActivitySummary]]
+    }
+  }
+
+  def listActivityZones(id: String): Future[ActivityZones] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/activities/$id/zones").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+        parse(response.body).extract[ActivityZones]
+    }
+  }
+
+  def listActivityLaps(id: String): Future[List[LapEffort]] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/activities/$id/laps").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[LapEffort]]
+    }
+  }
+
+  def retrieveClub(id: String): Future[Club] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/clubs/$id").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+      parse(response.body).extract[Club]
+    }
+  }
+
+  def listAthleteClubs(id: String): Future[List[ClubSummary]] = {
+    val request = WS.url(s"https://www.strava.com/api/v3/athlete/clubs").withHeaders("Authorization" -> authString)
+    request.get()
+      .map { response =>
+      parse(response.body).extract[List[ClubSummary]]
+    }
+  }
+
+
 
 
 

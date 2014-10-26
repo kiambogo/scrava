@@ -26,7 +26,11 @@ object Application extends Controller {
   }
 
   def myActivities= Action.async {
-    client.listCurrentAthleteActivities(Some("1382676569"), None, Some("1"), None).map(activities => Ok(write(activities)))
+    client.listCurrentAthleteActivities(None, None, None, None).map(activities => Ok(write(activities)))
+  }
+
+  def friendsActivities= Action.async {
+    client.listFriendsActivities(None, None).map(activities => Ok(write(activities)))
   }
 
   def athlete = Action.async {

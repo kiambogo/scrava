@@ -51,9 +51,7 @@ case class Activity(
   segmentEfforts: List[SegmentEffort],
   splitsMetric: List[SplitMetrics],
   splitsStandard: List[SplitStandard],
-  bestEfforts: List[SegmentEffort]) {
-
-}
+  bestEfforts: List[SegmentEffort])
 
 case class ActivitySummary(
   id: Int,
@@ -97,9 +95,7 @@ case class ActivitySummary(
   max_heartrate: Option[Float],
   truncated: Option[Int],
   has_kudoed: Boolean,
-  workout_type: Option[Int]) {
-
-}
+  workout_type: Option[Int])
 
 case class PersonalActivitySummary(
   id: Int,
@@ -143,9 +139,7 @@ case class PersonalActivitySummary(
   max_heartrate: Option[Float],
   truncated: Option[Int],
   has_kudoed: Boolean,
-  workout_type: Option[Int]) {
-
-}
+  workout_type: Option[Int])
 
 case class ActivityComments(
   id: Int,
@@ -153,6 +147,14 @@ case class ActivityComments(
   resource_state: Int,
   text: String,
   athlete: AthleteSummary,
-  created_at: String) {
+  created_at: String)
 
-}
+case class ActivityZones(
+  score: Option[Int],
+  distribution_buckets: List[Map[String, Int]],
+  `type`: String,
+  resource_state: Int,
+  sensor_based: Boolean,
+  points: Option[Int],
+  custom_zones: Option[Boolean],
+  max: Option[Int])

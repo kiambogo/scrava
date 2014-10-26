@@ -26,7 +26,7 @@ case class Athlete(
   measurement_preference: String,
   email: String,
   ftp: Option[Int],
-  clubs: List[Club],
+  clubs: List[ClubSummary],
   bikes: List[Gear],
   shoes: List[Gear]) {
 

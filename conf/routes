@@ -11,6 +11,7 @@ GET     /friends/:id                    controllers.Application.friends(id)
 
 #Activities
 GET     /activities/                    controllers.Application.myActivities
+GET     /activities/friends             controllers.Application.friendsActivities
 GET     /activity/:id                   controllers.Application.activity(id)
 POST    /activity/                      controllers.Application.createActivity()
 
