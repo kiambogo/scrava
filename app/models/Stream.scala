@@ -5,46 +5,6 @@ package models
  */
 trait Streams
 
-case class TimeStream(
-  time: Time,
-  distance: Distance)
-
-case class LatLngStream(
-  latlng: LatLng,
-  distance: Distance)
-
-case class AltitudeStream(
-  distance: Distance,
-  altitude: Altitude)
-
-case class VelocityStream(
-  distance: Distance,
-  velocity: Velocity)
-
-case class HeartrateStream(
-  distance: Distance,
-  heartrate: Heartrate)
-
-case class CadenceStream(
-  distance: Distance,
-  cadence: Cadence)
-
-case class WattsStream(
-  distance: Distance,
-  watts: Watts)
-
-case class TempStream(
-  distance: Distance,
-  temp: Temp)
-
-case class MovingStream(
-  distance: Distance,
-  moving: Moving)
-
-case class GradeStream(
-  distance: Distance,
-  grade: Grade)
-
 case class LatLng(
   `type`: String = "latlng",
   data: List[List[Double]] = List(),

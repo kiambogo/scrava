@@ -10,8 +10,9 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger._
 import play.api.Play.current
-import play.api.libs.json.{JsValue, JsArray}
+import play.api.libs.json.JsValue
 import play.api.libs.ws.WS
+import play.mvc.Http.MultipartFormData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -451,4 +452,28 @@ class ScravaClient(accessToken: String) {
       case "grade_smooth" => parse(streamData.toString).extract[Grade]
     }
   }
+
+  def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
+                      trainer: Option[Int], data_type: String, external_id: Option[String], file: MultipartFormData): Future[Boolean] = {
+    var request = WS.url(s"https://www.strava.com/api/v3/uploads").withHeaders("Authorization" -> authString)
+    val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "name" -> name, "description" -> description,
+      "private" -> `private`, "trainer" -> trainer, "external_id" -> external_id)
+    request.withQueryString("data_type" -> data_type)
+    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    request.post(file)
+    .map { response =>
+      response.statusText equals(201)
+    }
+  }
+
+  def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): Future[UploadStatus] = {
+    WS.url(s"https://www.strava.com/api/v3/uploads/$upload_id").withHeaders("Authorization" -> authString)
+      .withQueryString("external_id" -> external_id, "activity_id" -> activity_id.get.toString, "status" -> status, "error" -> error.get)
+      .get()
+      .map { response =>
+        parse(response.body).extract[UploadStatus]
+    }
+  }
+
 }
+
