@@ -1,5 +1,6 @@
 .gitignore
 logs
+project
 project/project
 project/target
 target
@@ -18,3 +19,4 @@ activator
 activator-launch-1.2.10.jar
 activator.bat
 .DS_Store
+scrava.properties
