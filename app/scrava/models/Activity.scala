@@ -1,4 +1,4 @@
-package models
+package scrava.models
 
 /**
  * Created by christopher on 2014-09-15.

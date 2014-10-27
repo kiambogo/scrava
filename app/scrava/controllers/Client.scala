@@ -1,4 +1,4 @@
-package controllers
+package scrava.controllers
 
 /**
  * Created by christopher on 2014-09-15.
@@ -14,6 +14,7 @@ import play.api.Logger._
 import play.api.Play.current
 import play.api.libs.json.JsValue
 import play.api.libs.ws.WS
+import scrava.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
