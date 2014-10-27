@@ -38,7 +38,7 @@ object Application extends Controller {
   }
 
   def athlete = Action.async {
-    client.retrieveAthlete(Some(5250729)).map(athlete => Ok(write(athlete.merge)))
+    client.retrieveAthlete().map(athlete => Ok(write(athlete.merge)))
   }
 
   def koms = Action.async {

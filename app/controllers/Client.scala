@@ -18,6 +18,7 @@ import play.api.libs.ws.WS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success, Try}
 
 class ScravaClient(accessToken: String) {
 
@@ -48,7 +49,10 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[AthleteSummary]]
+      Try { parse(response.body).extract[List[AthleteSummary]] } match {
+        case Success(athletes) => athletes
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends: $error")
+      }
     }
   }
 
@@ -65,7 +69,10 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[AthleteSummary]]
+      Try { parse(response.body).extract[List[AthleteSummary]] } match {
+        case Success(followers) => followers
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete followers: $error")
+      }
     }
   }
 
@@ -76,7 +83,10 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[AthleteSummary]]
+      Try { parse(response.body).extract[List[AthleteSummary]] } match {
+        case Success(followings) => followings
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of mutual followers: $error")
+      }
     }
   }
 
@@ -87,19 +97,25 @@ class ScravaClient(accessToken: String) {
       WS.url(s"https://www.strava.com/api/v3/athlete").withHeaders("Authorization" -> authString)
         .get()
         .map { response =>
-        Left(parse(response.body).extract[Athlete])
+        Try { Left(parse(response.body).extract[Athlete]) } match {
+          case Success(athlete) => athlete
+          case Failure(error) => throw new RuntimeException(s"Could not parse Athlete: $error")
+        }
       }
     } else {
       //Return specified athlete summary
-      WS.url(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get).withHeaders("Authorization" -> authString)
+      WS.url(s"https://www.strava.com/api/v3/athletes/" + athlete_id.get).withHeaders("Authorization" -> authString)
         .get()
         .map { response =>
-        Right(parse(response.body).extract[AthleteSummary])
+        Try { Right(parse(response.body).extract[AthleteSummary]) } match {
+          case Success(athleteSummary) => athleteSummary
+          case Failure(error) => throw new RuntimeException(s"Could not parse athleteSummary: $error")
+        }
       }
     }
   }
 
-  // Update an ahtlete's properties (requires Write)
+  // Update an ahtlete's properties (requires Write) TODO
   def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): Future[Athlete] = {
     WS.url("https://www.strava.com/api/v3/athlete")
       .withHeaders("Authorization" -> authString)
@@ -117,16 +133,19 @@ class ScravaClient(accessToken: String) {
   def listAthleteKOMs(athlete_id: Option[Int] = None, page: Option[Int] = None, resultsPerPage: Option[Int] = None): Future[List[SegmentEffort]] = {
     var request = if (!athlete_id.isDefined) {
       //Return current authenticated athlete's followers
-      WS.url(s"https://www.strava.com/api/v3/athletes/"+returnAthlete().id +"/koms").withHeaders("Authorization" -> authString)
+      WS.url(s"https://www.strava.com/api/v3/athletes/" + returnAthlete().id + "/koms").withHeaders("Authorization" -> authString)
     } else {
       //Return specified athlete followers
-      WS.url(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get+"/koms").withHeaders("Authorization" -> authString)
+      WS.url(s"https://www.strava.com/api/v3/athletes/" + athlete_id.get + "/koms").withHeaders("Authorization" -> authString)
     }
     val tempMap = Map[String, Option[Int]]("page" -> page, "resultsPerPage" -> resultsPerPage)
-    tempMap.map(params => params._2 map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
+    tempMap.map(params => params._2 map (opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[SegmentEffort]]
+      Try { parse(response.body).extract[List[SegmentEffort]] } match {
+        case Success(koms) => koms
+        case Failure(error) => throw new RuntimeException(s"Could not parse athlete KOMs: $error")
+      }
     }
   }
 
@@ -144,9 +163,15 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[ActivityComments]]
+      Try {
+        parse(response.body).extract[List[ActivityComments]]
+      } match {
+        case Success(comments) => comments
+        case Failure(error) => throw new RuntimeException(s"Could not parse activity comments: $error")
+      }
     }
   }
+
 
   // List the athletes who have 'kudosed' the specified activity
   def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): Future[List[AthleteSummary]] = {
@@ -155,7 +180,12 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[AthleteSummary]]
+      Try {
+        parse(response.body).extract[List[AthleteSummary]]
+      } match {
+        case Success(athleteList) => athleteList
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of kudosers for activity: $error")
+      }
     }
   }
 
@@ -165,7 +195,10 @@ class ScravaClient(accessToken: String) {
       .withQueryString()
       .get()
       .map { response =>
-      parse(response.body).extract[List[Photo]]
+      Try { parse(response.body).extract[List[Photo]] } match {
+        case Success(photos) => photos
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of photos: $error")
+      }
     }
   }
 
@@ -183,7 +216,10 @@ class ScravaClient(accessToken: String) {
     ))
       .map { response =>
       println(response.json)
-      parse(response.body).extract[Activity]
+      Try { parse(response.body).extract[Activity] } match {
+        case Success(activity) => activity
+        case Failure(error) => throw new RuntimeException("Could not create activity: $error")
+      }
     }
   }
 
@@ -195,9 +231,19 @@ class ScravaClient(accessToken: String) {
     request.get()
       .map { response =>
       if (response.json.\("resource_state").toString == "3") {
-        Left(parse(response.body).extract[Activity])
+        Try {
+          Left(parse(response.body).extract[Activity])
+        } match {
+          case Success(activity) => activity
+          case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+        }
       } else {
-        Right(parse(response.body).extract[ActivitySummary])
+        Try {
+          Right(parse(response.body).extract[ActivitySummary])
+        } match {
+          case Success(activitySummary) => activitySummary
+          case Failure(error) => throw new RuntimeException(s"Could not parse activitySummary: $error")
+        }
       }
     }
   }
@@ -210,7 +256,12 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.put("")
       .map { response =>
-      parse(response.body).extract[Activity]
+      Try {
+        parse(response.body).extract[Activity]
+      } match {
+        case Success(activity) => activity
+        case Failure(error) => throw new RuntimeException(s"Could not update activity: $error")
+      }
     }
   }
 
@@ -218,7 +269,12 @@ class ScravaClient(accessToken: String) {
     WS.url(s"https://www.strava.com/api/v3/activities/$id")
       .delete()
       .map { response =>
-      response.status.equals(204)
+      Try {
+        response.status.equals(204)
+      } match {
+        case Success(bool) => bool
+        case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
+      }
     }
   }
 
@@ -230,7 +286,12 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[PersonalActivitySummary]]
+      Try {
+        parse(response.body).extract[List[PersonalActivitySummary]]
+      } match {
+        case Success(activities) => activities
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of activities: $error")
+      }
     }
   }
 
@@ -241,7 +302,12 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[ActivitySummary]]
+      Try {
+        parse(response.body).extract[List[ActivitySummary]]
+      } match {
+        case Success(activities) => activities
+        case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities: $error")
+      }
     }
   }
 
@@ -249,7 +315,12 @@ class ScravaClient(accessToken: String) {
     val request = WS.url(s"https://www.strava.com/api/v3/activities/$id/zones").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-      parse(response.body).extract[ActivityZones]
+      Try {
+        parse(response.body).extract[ActivityZones]
+      } match {
+        case Success(zones) => zones
+        case Failure(error) => throw new RuntimeException(s"Could not parse activty zones: $error")
+      }
     }
   }
 
@@ -257,7 +328,12 @@ class ScravaClient(accessToken: String) {
     val request = WS.url(s"https://www.strava.com/api/v3/activities/$activity_id/laps").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-      parse(response.body).extract[List[LapEffort]]
+      Try {
+        parse(response.body).extract[List[LapEffort]]
+      } match {
+        case Success(laps) => laps
+        case Failure(error) => throw new RuntimeException(s"Could not parse activty laps: $error")
+      }
     }
   }
 
@@ -265,19 +341,31 @@ class ScravaClient(accessToken: String) {
   //  |    |    |  | |__]
   //  |___ |___ |__| |__]
 
+  // Retrieve a detailed description of the specified club id
   def retrieveClub(club_id: String): Future[Club] = {
     val request = WS.url(s"https://www.strava.com/api/v3/clubs/$club_id").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-      parse(response.body).extract[Club]
+      Try {
+        parse(response.body).extract[Club]
+      } match {
+        case Success(club) => club
+        case Failure(error) => throw new RuntimeException(s"Could not parse club: $error")
+      }
     }
   }
 
+  // Return a list of clubs that the authenticated athlete is part of
   def listAthleteClubs: Future[List[ClubSummary]] = {
     val request = WS.url(s"https://www.strava.com/api/v3/athlete/clubs").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-      parse(response.body).extract[List[ClubSummary]]
+      Try {
+        parse(response.body).extract[List[ClubSummary]]
+      } match {
+        case Success(clubs) => clubs
+        case Failure(error) => throw new RuntimeException(s"Could not parse clubs: $error")
+      }
     }
   }
 
@@ -287,7 +375,12 @@ class ScravaClient(accessToken: String) {
     tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
     request.get()
       .map { response =>
-      parse(response.body).extract[List[AthleteSummary]]
+      Try {
+        parse(response.body).extract[List[AthleteSummary]]
+      } match {
+        case Success(members) => members
+        case Failure(error) => throw new RuntimeException(s"Could not parse club members: $error")
+      }
     }
   }
 
