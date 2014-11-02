@@ -6,7 +6,7 @@ package scrava.models
 case class Polyline(
   id: String,
   polyline: Option[String],
-  summary_polyline: String,
+  summary_polyline: Option[String],
   resource_state: Int) {
 
 }
