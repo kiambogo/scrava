@@ -3,7 +3,7 @@ package scrava.models
 /**
  * Created by christopher on 2014-09-15.
  */
-case class Athlete(
+case class DetailedAthlete(
   id: Int,
   resource_state: Int,
   firstname: String,

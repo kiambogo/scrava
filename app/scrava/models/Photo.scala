@@ -13,6 +13,4 @@ caption:	String,
 `type`:	String,
 uploaded_at: String,
 created_at: String,
-location:	List[Float]) {
-
-}
+location:	Option[List[Float]])
