@@ -390,11 +390,11 @@ class ScravaClient(accessToken: String) {
   //  | __ |___ |__| |__/
   //  |__] |___ |  | |  \
 
-  def retrieveAthleteGear(gear_id: Int): Future[List[Gear]] = {
+  def retrieveAthleteGear(gear_id: String): Future[Gear] = {
     val request = WS.url(s"https://www.strava.com/api/v3/gear/$gear_id").withHeaders("Authorization" -> authString)
     request.get()
       .map { response =>
-      parse(response.body).extract[List[Gear]]
+      parse(response.body).extract[Gear]
     }
   }
 
