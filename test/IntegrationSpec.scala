@@ -76,17 +76,17 @@ class IntegrationTest extends PlaySpec with OneAppPerSuite {
       (kudoers map (_.id == 3776) contains true) must equal(true)
     }
 
-//    "retrieve activity details " in {
-//      val futureActivity = testClient.retrieveActivity(118293263)
-//      val activity = Await.result(futureActivity, Duration(5, duration.SECONDS)).merge.asInstanceOf[Activity]
-//      activity.id must equal(118293263)
-//    }
+    "retrieve activity details " in {
+        val futureActivity = testClient.retrieveActivity(118293263)
+      val activity = Await.result(futureActivity, Duration(5, duration.SECONDS)).merge.asInstanceOf[Activity]
+      activity.id must equal(118293263)
+    }
 
-//    "retrieve activity photos " in {
-//      val futurePhotos = testClient.listActivityPhotos(118293263)
-//      val photos = Await.result(futurePhotos, Duration(5, duration.SECONDS))
-//      photos.size must equal(0)
-//    }
+    "retrieve activity photos " in {
+      val futurePhotos = testClient.listActivityPhotos(118293263)
+      val photos = Await.result(futurePhotos, Duration(5, duration.SECONDS))
+      photos.size must equal(0)
+    }
 
 
   }

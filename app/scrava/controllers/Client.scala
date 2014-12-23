@@ -177,17 +177,19 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //TODO
   // List photos associated with a specified activity
   def listActivityPhotos(id: Int): Future[List[Photo]] = {
     WS.url(s"https://www.strava.com/api/v3/activities/$id/photos")
       .get()
       .map { response =>
-      println(response)
-      Try { parse(response.body).extract[List[Photo]] } match {
-        case Success(photos) => photos
-        case Failure(error) => throw new RuntimeException(s"Could not parse list of photos: $error")
-      }
+      if (response.status == 200) {
+        Try {
+          parse(response.body).extract[List[Photo]]
+        } match {
+          case Success(photos) => photos
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of photos: $error")
+        }
+      } else List()
     }
   }
 
