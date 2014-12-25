@@ -70,23 +70,37 @@ class IntegrationTest extends PlaySpec with OneAppPerSuite {
       (comments map (_.text == "test comment") contains true) must equal(true)
     }
 
-    "retrieve activity kudoers " in {
+    "retrieve activity kudoers" in {
       val futureKudoers = testClient.listActivityKudoers(118293263)
       val kudoers = Await.result(futureKudoers, Duration(5, duration.SECONDS))
       (kudoers map (_.id == 3776) contains true) must equal(true)
     }
 
-    "retrieve activity details " in {
+    "retrieve activity details" in {
         val futureActivity = testClient.retrieveActivity(118293263)
       val activity = Await.result(futureActivity, Duration(5, duration.SECONDS)).merge.asInstanceOf[Activity]
       activity.id must equal(118293263)
     }
 
-    "retrieve activity photos " in {
-      val futurePhotos = testClient.listActivityPhotos(118293263)
-      val photos = Await.result(futurePhotos, Duration(5, duration.SECONDS))
-      photos.size must equal(0)
+//    "retrieve activity summary" in {
+//      val futureActivity = testClient.retrieveActivity(191823321)
+//      val activity = Await.result(futureActivity, Duration(5, duration.SECONDS)).merge.asInstanceOf[ActivitySummary]
+//      activity.id must equal(191823321)
+//    }
+
+//    "retrieve activity photos" in {
+//      val futurePhotos = testClient.listActivityPhotos(118293263)
+//      val photos = Await.result(futurePhotos, Duration(5, duration.SECONDS))
+//      photos.size must equal(0)
+//    }
+
+    "retrieve friends activities" in {
+      val futureActivities = testClient.listFriendsActivities()
+      val activities = Await.result(futureActivities, Duration(5, duration.SECONDS))
+      activities.size must equal(30)
     }
+
+
 
 
   }
