@@ -1,17 +1,13 @@
-name := """Scrava"""
+name := "Scrava"
 
 version := "1.0"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 libraryDependencies ++= Seq(
-  jdbc,
-  anorm,
-  cache,
-  ws,
+  "org.scalaj" %% "scalaj-http" % "1.1.0",
   "net.liftweb" %% "lift-json" % "3.0-M2",
   "org.scalatest" %% "scalatest" % "2.2.2",
-  "org.scalatestplus" %% "play" % "1.2.0" % "test"
+  "joda-time" % "joda-time" % "2.6",
+  "org.joda" % "joda-convert" % "1.2"
 )
