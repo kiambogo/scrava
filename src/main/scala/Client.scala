@@ -187,7 +187,7 @@ class ScravaClient(accessToken: String) {
       .map(params => params._2.map(opt => {
       request = request.param(params._1, params._2.get.toString)
     }))
-    if (parse(request.asString.body).\("resource_state").extract[Int] == 3) {
+    if (parse(request.asString.body).\("athlete").\("resource_state").extract[Int] == 3) {
       Try {
         Left(parse(request.asString.body).extract[Activity])
       } match {
