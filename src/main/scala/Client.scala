@@ -265,10 +265,10 @@ class ScravaClient(accessToken: String) {
   }
 
 
-  def listActivityZones(id: Int): ActivityZones = {
+  def listActivityZones(id: Int): List[ActivityZones] = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id/zones").header("Authorization", authString)
     Try {
-      parse(request.asString.body).extract[ActivityZones]
+      parse(request.asString.body).extract[List[ActivityZones]]
     } match {
       case Success(zones) => zones
       case Failure(error) => throw new RuntimeException(s"Could not parse activty zones: $error")
