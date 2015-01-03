@@ -313,7 +313,7 @@ class ScravaClient(accessToken: String) {
   }
 
 
-  def listClubMembers(club_id: Int, page: Option[Int], per_page: Option[Int]): List[AthleteSummary] = {
+  def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/members").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -326,7 +326,7 @@ class ScravaClient(accessToken: String) {
   }
 
 
-  def listClubActivities(club_id: Int, page: Option[Int], per_page: Option[Int]): List[ActivitySummary] = {
+  def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/activities").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))

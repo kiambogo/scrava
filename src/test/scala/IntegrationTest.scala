@@ -84,5 +84,30 @@ class IntegrationTest extends FlatSpec with Matchers {
     zones(0).score should equal(Some(12))
   }
 
+  it should "retrieve activity laps" in {
+    val laps = testClient.listActivityLaps(103373338)
+    laps(0).name should equal("Lap 1")
+  }
+
+  it should "retrieve a club" in {
+    val club = testClient.retrieveClub(45255)
+    club.name should equal("Test Club")
+  }
+
+  it should "retrieve a list of clubs the user is in" in {
+    val clubs = testClient.listAthleteClubs
+    clubs.size should equal(1)
+  }
+
+  it should "retrieve a list of club members" in {
+    val members = testClient.listClubMembers(45255)
+    (members map (_.id == 3545423) contains true) should equal(true)
+  }
+
+  it should "retrieve a list of club activities" in {
+    val activities = testClient.listClubActivities(45255)
+    activities(0).start_date should equal("2014-12-04T20:36:25Z")
+  }
+
 
 }
