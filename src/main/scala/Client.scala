@@ -353,22 +353,22 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[Segment]
   }
 
-  def listAthleteStarredSegments(page: Option[Int], per_page: Option[Int]): List[SegmentSummary] = {
+  def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[SegmentSummary]]
   }
 
-  def listStarredSegments(athlete_id: Int, page: Option[Int], per_page: Option[Int]): List[SegmentSummary] = {
+  def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$athlete_id/activities").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[SegmentSummary]]
   }
 
-  def listEfforts(segment_id: Int, athlete_id: Option[Int], start_date_local: Option[DateTime],
-                  end_date_local: Option[DateTime], page: Option[Int], per_page: Option[Int]): List[SegmentEffort] = {
+  def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None,
+                  end_date_local: Option[DateTime] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentEffort] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/all_efforts").header("Authorization", authString)
     val tempMap = Map[String, Option[Any]]("start_date_local" -> start_date_local, "end_date_local" -> end_date_local, "page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))

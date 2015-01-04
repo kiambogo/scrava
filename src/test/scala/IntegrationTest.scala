@@ -59,6 +59,7 @@ class IntegrationTest extends FlatSpec with Matchers {
     (kudoers map (_.id == 3776) contains true) should equal(true)
   }
 
+//  TODO
 //  it should "retrieve activity details" in {
 //    val activity = testClient.retrieveActivity(118293263).merge.asInstanceOf[Activity]
 //    activity.id should equal(118293263)
@@ -109,5 +110,26 @@ class IntegrationTest extends FlatSpec with Matchers {
     activities(0).start_date should equal("2014-12-04T20:36:25Z")
   }
 
+//  TODO
+//  it should "retrieve a gear item" in {
+//    val gear = testClient.retrieveAthleteGear("b77076")
+//    gear.name should equal("burrito burner")
+//  }
+
+  it should "retrieve a detailed segment" in {
+    val segment = testClient.retrieveSegment(229781)
+    segment.name should equal("Hawk Hill")
+  }
+
+  it should "retrieve a list of athlete starred segments" in {
+    val segments = testClient.listAthleteStarredSegments()
+    segments(0).name should equal("Hawk Hill")
+  }
+
+  it should "retrieve a list of segment efforts" in {
+    val efforts = testClient.listEfforts(229781)
+    efforts(0).name should equal("Hawk Hill")
+    efforts(0).elapsed_time should equal(769)
+  }
 
 }
