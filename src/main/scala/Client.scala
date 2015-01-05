@@ -181,25 +181,45 @@ class ScravaClient(accessToken: String) {
   //  }
   //
   // Retrieve detailed information about a specified activity
-  def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Either[Activity, ActivitySummary] = {
+  def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString)
     Map[String, Option[Boolean]]("includeEfforts" -> includeEfforts)
       .map(params => params._2.map(opt => {
       request = request.param(params._1, params._2.get.toString)
     }))
-    if (parse(request.asString.body).\("athlete").\("resource_state").extract[Int] == 3) {
-      Try {
-        Left(parse(request.asString.body).extract[Activity])
-      } match {
-        case Success(activity) => activity
-        case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+
+    //if detailed activity
+    if (parse(request.asString.body).\("resource_state").extract[Int] == 3) {
+      if (parse(request.asString.body).\("athlete").\("resource_state").extract[Int] == 2) {
+        Try {
+          parse(request.asString.body).extract[DetailedActivity]
+        } match {
+          case Success(activity) => activity
+          case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+        }
+      } else {
+        Try {
+          parse(request.asString.body).extract[PersonalDetailedActivity]
+        } match {
+          case Success(activitySummary) => activitySummary
+          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary: $error")
+        }
       }
     } else {
-      Try {
-        Right(parse(request.asString.body).extract[ActivitySummary])
-      } match {
-        case Success(activitySummary) => activitySummary
-        case Failure(error) => throw new RuntimeException(s"Could not parse activitySummary: $error")
+      if (parse(request.asString.body).\("athlete").\("resource_state").extract[Int] == 2) {
+        Try {
+          parse(request.asString.body).extract[ActivitySummary]
+        } match {
+          case Success(activity) => activity
+          case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+        }
+      } else {
+        Try {
+          parse(request.asString.body).extract[PersonalActivitySummary]
+        } match {
+          case Success(activitySummary) => activitySummary
+          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary: $error")
+        }
       }
     }
   }

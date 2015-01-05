@@ -56,14 +56,13 @@ class IntegrationTest extends FlatSpec with Matchers {
     (kudoers map (_.id == 3776) contains true) should equal(true)
   }
 
-//  TODO
-//  it should "retrieve activity details" in {
-//    val activity = testClient.retrieveActivity(118293263).merge.asInstanceOf[Activity]
-//    activity.id should equal(118293263)
-//  }
+  it should "retrieve activity details" in {
+    val activity = testClient.retrieveActivity(118293263).asInstanceOf[PersonalDetailedActivity]
+    activity.id should equal(118293263)
+  }
 
   it should "retrieve activity summary" in {
-    val activity = testClient.retrieveActivity(191823321).merge.asInstanceOf[ActivitySummary]
+    val activity = testClient.retrieveActivity(191823321).asInstanceOf[DetailedActivity]
     activity.id should equal(191823321)
   }
 

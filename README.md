@@ -1,4 +1,4 @@
-##Scrava
+#Scrava
 
 A Scala client for the Strava API built upon ScalaJ-HTTP library and Lift JSON.
 
@@ -22,6 +22,13 @@ AutoPagination.getAll(client.listMutualFollowing _, athlete_id)
 where athlete_id is the particular Athlete ID you wish to find mutual followers for, and is a parameter to the `listMutualFollowing()` function.
 
 The underscore at the end marks it as a partially applied function, leaving the rest of the parameters to be curried. 
+
+##TODO
+- Activity Upload
+- Athlete Update
+- Activity Update
+- Activity Delete
+- Check Activity Upload status
 
 
 
