@@ -422,30 +422,30 @@ class ScravaClient(accessToken: String) {
 
   def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
-      "latlng,distance,altitude"
+      "time,latlng,distance,altitude"
     } else { stream_types.get }
     val request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/streams/"+types).header("Authorization", authString).param("resolution", "high")
     parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
   }
 
-  def parseStream(streamData: JObject): Streams = {
-    val dataType = streamData.\("type").toString
-    val dataStr = streamData.toString()
+  def parseStream(streamData: JValue): Streams = {
+    val dataType = streamData.\("type").extract[String]
     dataType.replace("\"","") match {
-      case "time" => parse(dataStr).extract[Time]
-      case "latlng" => parse(streamData.toString).extract[LatLng]
-      case "distance" => parse(streamData.toString).extract[Distance]
-      case "altitude" => parse(streamData.toString).extract[Altitude]
-      case "velocity_smooth" => parse(streamData.toString).extract[Velocity]
-      case "heartrate" => parse(streamData.toString).extract[Heartrate]
-      case "cadence" => parse(streamData.toString).extract[Cadence]
-      case "watts" => parse(streamData.toString).extract[Watts]
-      case "temp" => parse(streamData.toString).extract[Temp]
-      case "moving" => parse(streamData.toString).extract[Moving]
-      case "grade_smooth" => parse(streamData.toString).extract[Grade]
+      case "time" => streamData.extract[Time]
+      case "latlng" => streamData.extract[LatLng]
+      case "distance" => streamData.extract[Distance]
+      case "altitude" => streamData.extract[Altitude]
+      case "velocity_smooth" => streamData.extract[Velocity]
+      case "heartrate" => streamData.extract[Heartrate]
+      case "cadence" => streamData.extract[Cadence]
+      case "watts" => streamData.extract[Watts]
+      case "temp" => streamData.extract[Temp]
+      case "moving" => streamData.extract[Moving]
+      case "grade_smooth" => streamData.extract[Grade]
     }
   }
-  //
+
+  //  TODO
   //  /*def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
   //                     trainer: Option[Int], data_type: String, external_id: Option[String], file: FilePart): Boolean] = {
   //    var request = Http(s"https://www.strava.com/api/v3/uploads").header("Authorization", authString)
@@ -458,7 +458,8 @@ class ScravaClient(accessToken: String) {
   //      request.asString.statusText equals(201)
   //    }
   //  }*/
-  //
+
+  //  TODO
   //  def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus] = {
   //    Http(s"https://www.strava.com/api/v3/uploads/$upload_id").header("Authorization", authString)
   //      .param("external_id" -> external_id, "activity_id" -> activity_id.get.toString, "status" -> status, "error" -> error.get)

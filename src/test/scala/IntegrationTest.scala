@@ -1,9 +1,6 @@
 import org.scalatest.{FlatSpec, Matchers}
 import scrava.models._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, duration}
-
 class IntegrationTest extends FlatSpec with Matchers {
 
   val testToken = "21b4fe41a815dd7de4f0cae7f04bbbf9aa0f9507"
@@ -130,6 +127,12 @@ class IntegrationTest extends FlatSpec with Matchers {
     val efforts = testClient.listEfforts(229781)
     efforts(0).name should equal("Hawk Hill")
     efforts(0).elapsed_time should equal(769)
+  }
+
+  it should "retrieve a segment stream" in {
+    val stream = testClient.retrieveSegmentStream("229781", Some("latlng"))
+    stream(0).asInstanceOf[LatLng].resolution should equal("high")
+    stream(1).asInstanceOf[Distance].original_size should equal(114)
   }
 
 }
