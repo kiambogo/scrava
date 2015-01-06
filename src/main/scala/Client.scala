@@ -20,8 +20,6 @@ class ScravaClient(accessToken: String) {
   //  |__|  |  |__| |    |___  |  |___
   //  |  |  |  |  | |___ |___  |  |___
 
-  //Friends + Following
-
   // List an athlete's friends. Returns current athlete's friends if athlete_id left null
   def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = if (!athlete_id.isDefined) {
@@ -110,12 +108,9 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-
   //  ____ ____ ___ _ _  _ _ ___ _   _
   //  |__| |     |  | |  | |  |   \_/
   //  |  | |___  |  |  \/  |  |    |
-
-  // Activity-Related Functions
 
   // List all comments from an activity
   def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments] = {
@@ -129,7 +124,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse activity comments: $error")
     }
   }
-
 
   // List the athletes who have 'kudosed' the specified activity
   def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
@@ -157,7 +151,7 @@ class ScravaClient(accessToken: String) {
     } else List()
   }
 
-  // Create/upload an activity (requires Write permissions, untested)
+  // Create an activity (requires Write permissions, untested)
   def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int,
                      description: Option[String], distance: Option[Float]): Activity = {
     val request = Http("https://www.strava.com/api/v3/activities").header("Authorization", authString).method("post")
@@ -167,7 +161,6 @@ class ScravaClient(accessToken: String) {
       case Success(activity) => activity
       case Failure(error) => throw new RuntimeException("Could not create activity: $error")
     }
-
   }
 
   // Retrieve detailed information about a specified activity
@@ -213,39 +206,33 @@ class ScravaClient(accessToken: String) {
       }
     }
   }
-  //
-  //  //TODO
-  //  def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
-  //                     trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Future[Activity] = {
-  //    var request = WS.url(s"https://www.strava.com/api/v3/activities/$activity_id").withHeaders("Authorization" -> authString)
-  //    val tempMap = Map[String, Option[Any]]("name" -> name, "type" -> `type`, "private" -> `private`, "commute" -> commute,
-  //      "trainer" -> trainer, "gear_id" -> gearId, "description" -> description)
-  //    tempMap.map(params => params._2.map(opt => { request = request.withQueryString(params._1 -> params._2.get.toString) }))
-  //    request.put("")
-  //      .map { response =>
-  //      Try {
-  //        parse(response.body).extract[Activity]
-  //      } match {
-  //        case Success(activity) => activity
-  //        case Failure(error) => throw new RuntimeException(s"Could not update activity: $error")
-  //      }
-  //    }
-  //  }
-  //
-  //  //TODO
-  //  def deleteActivity(id: Long): Future[Boolean] = {
-  //    WS.url(s"https://www.strava.com/api/v3/activities/$id")
-  //      .delete()
-  //      .map { response =>
-  //      Try {
-  //        response.status.equals(204)
-  //      } match {
-  //        case Success(bool) => bool
-  //        case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
-  //      }
-  //    }
-  //  }
-  //
+
+  // Update an activity (requires Write permissions, untested)
+  def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
+                     trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Activity = {
+    var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString).method("put")
+    val tempMap = Map[String, Option[Any]]("name" -> name, "type" -> `type`, "private" -> `private`, "commute" -> commute,
+      "trainer" -> trainer, "gear_id" -> gearId, "description" -> description)
+    tempMap.map(params => params._2.map(opt => { request = request.params((params._1, params._2.get.toString)) }))
+
+    Try { parse(request.asString.body).extract[DetailedActivity] } match {
+      case Success(activity) => activity
+      case Failure(error) => throw new RuntimeException(s"Could not update activity: $error")
+    }
+  }
+
+  // Delete an activity (requires Write permissions, untested)
+  def deleteActivity(id: Long): Boolean = {
+    val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
+    Try {
+      request.asString.statusLine.equals(204)
+    } match {
+      case Success(bool) => bool
+      case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
+    }
+
+  }
+
   // Lists activities associated with the currently authenticated athlete
   def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None,
                             page: Option[Int] = None, per_page: Option[Int] = None): List[PersonalActivitySummary] = {
@@ -273,7 +260,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities: $error")
     }
   }
-
 
   def listActivityZones(id: Int): List[ActivityZones] = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id/zones").header("Authorization", authString)
@@ -310,7 +296,6 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-
   // Return a list of clubs that the authenticated athlete is part of
   def listAthleteClubs: List[ClubSummary] = {
     val request = Http(s"https://www.strava.com/api/v3/athlete/clubs").header("Authorization", authString)
@@ -321,7 +306,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse clubs: $error")
     }
   }
-
 
   def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/members").header("Authorization", authString)
@@ -335,14 +319,12 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-
   def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/activities").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[ActivitySummary]]
   }
-
 
   //  ____ ____ ____ ____
   //  | __ |___ |__| |__/
@@ -429,7 +411,6 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
   }
 
-
   def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude"
@@ -455,35 +436,35 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //  TODO
-  //  /*def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
-  //                     trainer: Option[Int], data_type: String, external_id: Option[String], file: FilePart): Boolean] = {
-  //    var request = Http(s"https://www.strava.com/api/v3/uploads").header("Authorization", authString)
-  //    val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "name" -> name, "description" -> description,
-  //      "private" -> `private`, "trainer" -> trainer, "external_id" -> external_id)
-  //    request.param("data_type" -> data_type)
-  //    tempMap.map(params => params._2.map(opt => { request = request.param(params._1 -> params._2.get.toString) }))
-  //    request.post()
-  //      .map { request.asString =>
-  //      request.asString.statusText equals(201)
-  //    }
-  //  }*/
+  //  _  _ ___  _    ____ ____ ___  ____
+  //  |  | |__] |    |  | |__| |  \ [__
+  //  |__| |    |___ |__| |  | |__/ ___]
 
-  //  TODO
-  //  def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus] = {
-  //    Http(s"https://www.strava.com/api/v3/uploads/$upload_id").header("Authorization", authString)
-  //      .param("external_id" -> external_id, "activity_id" -> activity_id.get.toString, "status" -> status, "error" -> error.get)
-  //      .get()
-  //      .map { request.asString =>
-  //      parse(request.asString.body).extract[UploadStatus]
-  //    }
-  //  }
+  // Upload an activity from a file (requires Write permissions, untested)
+  def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
+                     trainer: Option[Int], data_type: String, external_id: Option[String], file: Array[Byte]): Boolean = {
+    var request = Http(s"https://www.strava.com/api/v3/uploads").header("Authorization", authString).method("post")
+    val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "name" -> name, "description" -> description,
+      "private" -> `private`, "trainer" -> trainer, "external_id" -> external_id)
+    request.param("data_type", data_type)
+    request.postData(file)
+    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
+    request.asString.statusLine equals("201")
+  }
 
+  // Check the upload status of the activity (untested)
+  def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus = {
+    val request = Http(s"https://www.strava.com/api/v3/uploads/$upload_id").header("Authorization", authString)
+      .params(Seq(("external_id", external_id), ("activity_id", activity_id.get.toString), ("status", status), ("error", error.get)))
+    Try { parse(request.asString.body).extract[UploadStatus] } match {
+      case Success(status) => status
+      case Failure(error) => throw new RuntimeException(s"Could not parse upload status: $error")
+    }
+  }
 
   //  ____ _  _ ___ ____    ___  ____ ____ _ _  _ ____ ___ _ ____ _  _
   //  |__| |  |  |  |  | __ |__] |__| | __ | |\ | |__|  |  | |  | |\ |
   //  |  | |__|  |  |__|    |    |  | |__] | | \| |  |  |  | |__| | \|
-
 
   def getAll[A, B](f: (Option[Int], Option[Int], Option[Int], Option[Int]) => List[B]): List[B] = {
     var counter = 0
