@@ -4,8 +4,10 @@
 
 import models.LapEffort
 import net.liftweb.json._
-import scrava.models._
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import scrava.models._
+
 import scala.util.{Failure, Success, Try}
 import scalaj.http.Http
 
@@ -36,7 +38,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends: $error")
     }
   }
-
 
   // List an athlete's followers. Returns current athlete's followers if athlete_id left null
   def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
@@ -85,20 +86,17 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //  //TODO
-  //  // Update an ahtlete's properties (requires Write) TODO
-  //  def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): Future[DetailedAthlete] = {
-  //    WS.url("https://www.strava.com/api/v3/athlete")
-  //      .withHeaders("Authorization" -> authString)
-  //      .put(Map(
-  //      "city" -> Seq(city),
-  //      "state" -> Seq(state),
-  //      "country" -> Seq(country),
-  //      "sex" -> Seq(sex),
-  //      "weight" -> Seq(weight.toString)))
-  //      .map { response =>
-  //      parse(response.body).extract[DetailedAthlete] }
-  //  }
+  // Update an athlete's properties (requires Write permissions, untested)
+  def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): DetailedAthlete = {
+    val request = Http("https://www.strava.com/api/v3/athlete").header("Authorization", authString).method("put")
+      .postForm(Seq(("city", city), ("state", state), ("country", country), ("sex", sex), ("weight", weight.toString)))
+    Try {
+      parse(request.asString.body).extract[DetailedAthlete]
+    } match {
+      case Success(athlete) => athlete
+      case Failure(error) => throw new RuntimeException(s"Could not update Athlete: $error")
+    }
+  }
 
   // List an athlete's KOMs
   def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, resultsPerPage: Option[Int] = None): List[SegmentEffort] = {
@@ -159,27 +157,19 @@ class ScravaClient(accessToken: String) {
     } else List()
   }
 
-  //  //TODO
-  //  def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int,
-  //                     description: Option[String], distance: Option[Float]): Future[Activity] = {
-  //    WS.url("https://www.strava.com/api/v3/activities")
-  //      .withHeaders("Authorization" -> authString)
-  //      .post(Map(
-  //      "name" -> Seq(name),
-  //      "elapsed_time" -> Seq(elapsedTime.toString),
-  //      "distance" -> Seq(distance.get.toString),
-  //      "start_date_local" -> Seq(startDateLocal.toString(ISODateTimeFormat.dateTime())),
-  //      "type" -> Seq(`type`)
-  //    ))
-  //      .map { response =>
-  //      println(response.json)
-  //      Try { parse(response.body).extract[Activity] } match {
-  //        case Success(activity) => activity
-  //        case Failure(error) => throw new RuntimeException("Could not create activity: $error")
-  //      }
-  //    }
-  //  }
-  //
+  // Create/upload an activity (requires Write permissions, untested)
+  def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int,
+                     description: Option[String], distance: Option[Float]): Activity = {
+    val request = Http("https://www.strava.com/api/v3/activities").header("Authorization", authString).method("post")
+      .postForm(Seq(("name", name),("elapsed_time",elapsedTime.toString), ("distance", distance.get.toString), ("start_date_local", startDateLocal.toString(ISODateTimeFormat.dateTime())),
+      ("type", `type`)))
+    Try { parse(request.asString.body).extract[Activity] } match {
+      case Success(activity) => activity
+      case Failure(error) => throw new RuntimeException("Could not create activity: $error")
+    }
+
+  }
+
   // Retrieve detailed information about a specified activity
   def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString)
@@ -305,9 +295,9 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //  ____ _    _  _ ___
-  //  |    |    |  | |__]
-  //  |___ |___ |__| |__]
+  //  ____ _    _  _ ___  ____
+  //  |    |    |  | |__] |__
+  //  |___ |___ |__| |__] ___|
 
   // Retrieve a detailed description of the specified club id
   def retrieveClub(club_id: Int): Club = {
@@ -489,5 +479,58 @@ class ScravaClient(accessToken: String) {
   //    }
   //  }
 
+
+  //  ____ _  _ ___ ____    ___  ____ ____ _ _  _ ____ ___ _ ____ _  _
+  //  |__| |  |  |  |  | __ |__] |__| | __ | |\ | |__|  |  | |  | |\ |
+  //  |  | |__|  |  |__|    |    |  | |__] | | \| |  |  |  | |__| | \|
+
+
+  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int], Option[Int]) => List[B]): List[B] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      curry4(f)(None)(None)(Some(200))(Some(counter))
+    }.takeWhile(_.size != 0).toList.flatten
+  }
+
+  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int]) => List[B], id: Option[Int]): List[B] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      curry2optId(f)(Some(200))(id)(Some(counter))
+    }.takeWhile(_.size != 0).toList.flatten
+  }
+
+  def getAll[A, B](f: (Int, Option[Int], Option[Int]) => List[B], id: Int): List[B] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      curry2id(f)(Some(200))(id)(Some(counter))
+    }.takeWhile(_.size != 0).toList.flatten
+  }
+
+  def getAll[A, B](f: (Option[Int], Option[Int]) => List[B]): List[B] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      curry2(f)(Some(200))(Some(counter))
+    }.takeWhile(_.size != 0).toList.flatten
+  }
+
+  def curry4[A, B, C, E, D](f: (A, B, C, D) => E): A => B => D => C => E = {
+    { (a: A) => { (b: B) => { (d: D) => { (c: C) => f(a, b, c, d) } } } }
+  }
+
+  def curry2id[A, B, C, D](f: (Int, B, C) => D): C => Int => B => D = {
+    { (c: C) => { (a: Int) => { (b: B) => f(a, b, c) } } }
+  }
+
+  def curry2optId[A, B, C, D](f: (Option[Int], B, C) => D): C => Option[Int] => B => D = {
+    { (c: C) => { (a: Option[Int]) => { (b: B) => f(a, b, c) } } }
+  }
+
+  def curry2[A, B, C](f: (A, B) => C): B => A => C = {
+    { (b: B) => { (a: A) => f(a, b) } }
+  }
 }
 
