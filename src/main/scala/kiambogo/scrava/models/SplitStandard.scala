@@ -1,9 +1,9 @@
-package scrava.models
+package kiambogo.scrava.models
 
 /**
  * Created by christopher on 2014-09-19.
  */
-case class SplitMetrics(
+case class SplitStandard(
   distance: Float,
   elapsed_time: Int,
   elevation_difference: Float,

@@ -1,5 +1,7 @@
+package kiambogo.scrava
+
+import kiambogo.scrava.models._
 import org.scalatest.{FlatSpec, Matchers}
-import scrava.models._
 
 class IntegrationTest extends FlatSpec with Matchers {
 

@@ -1,5 +1,7 @@
 name := "Scrava"
 
+organization := "com.github.kiambogo"
+
 version := "1.0"
 
 scalaVersion := "2.11.4"

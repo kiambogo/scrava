@@ -1,12 +1,12 @@
 /**
  * Created by christopher on 2014-09-15.
  */
+package kiambogo.scrava
 
-import models.LapEffort
 import net.liftweb.json._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scrava.models._
+import kiambogo.scrava.models._
 
 import scala.util.{Failure, Success, Try}
 import scalaj.http.Http

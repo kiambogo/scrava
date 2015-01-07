@@ -1,4 +1,4 @@
-package scrava.models
+package kiambogo.scrava.models
 
 /**
  * Created by christopher on 14-10-23.
