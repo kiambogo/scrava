@@ -108,6 +108,16 @@ class ScravaClient(accessToken: String) {
     }
   }
 
+  // List an athlete's stats 
+  def listAthleteStats(athlete_id: Int): Stats = {
+    //Return specified athlete followers
+    var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/stats").header("Authorization", authString)
+    Try { parse(request.asString.body).extract[Stats] } match {
+      case Success(stats) => stats 
+      case Failure(error) => throw new RuntimeException(s"Could not parse athlete stats: $error")
+    }
+  }
+
   //  ____ ____ ___ _ _  _ _ ___ _   _
   //  |__| |     |  | |  | |  |   \_/
   //  |  | |___  |  |  \/  |  |    |
@@ -369,10 +379,11 @@ class ScravaClient(accessToken: String) {
 
   def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String],
                               weight_class: Option[String], following: Option[Boolean], club_id: Option[Int],
-                              date_range: Option[String], page: Option[Int], per_page: Option[Int]): SegmentLeaderBoards = {
+                              date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int]): SegmentLeaderBoards = {
     var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/leaderboard").header("Authorization", authString)
     val tempMap = Map[String, Option[Any]]("gender" -> gender, "age_group" -> age_group, "weight_class" -> weight_class,
-      "following" -> following, "club_id" -> club_id, "date_range" -> date_range, "page" -> page, "per_page" -> per_page)
+      "following" -> following, "club_id" -> club_id, "date_range" -> date_range, "context_entries" -> context_entries,
+      "page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[SegmentLeaderBoards]
   }

@@ -26,6 +26,7 @@ case class DetailedAthlete(
   measurement_preference: String,
   email: String,
   ftp: Option[Int],
+  weight: Option[Float],
   clubs: List[ClubSummary],
   bikes: List[GearSummary],
   shoes: List[GearSummary])
