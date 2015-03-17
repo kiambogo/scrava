@@ -1,4 +1,4 @@
-#Scrava
+![Scrava](https://cloud.githubusercontent.com/assets/4472397/6699144/9a4ee65c-ccd5-11e4-9369-e89eea337b17.jpg)
 
 A lightweight 	Scala client for the Strava API built upon ScalaJ-HTTP library and Lift JSON.
 
