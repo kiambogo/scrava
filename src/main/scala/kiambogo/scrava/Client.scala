@@ -16,10 +16,6 @@ class ScravaClient(accessToken: String) {
   implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
 
-  //  ____ ___ _  _ _    ____ ___ ____
-  //  |__|  |  |__| |    |___  |  |___
-  //  |  |  |  |  | |___ |___  |  |___
-
   // List an athlete's friends. Returns current athlete's friends if athlete_id left null
   def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = if (!athlete_id.isDefined) {
@@ -117,10 +113,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse athlete stats: $error")
     }
   }
-
-  //  ____ ____ ___ _ _  _ _ ___ _   _
-  //  |__| |     |  | |  | |  |   \_/
-  //  |  | |___  |  |  \/  |  |    |
 
   // List all comments from an activity
   def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments] = {
@@ -291,10 +283,6 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //  ____ _    _  _ ___  ____
-  //  |    |    |  | |__] |__
-  //  |___ |___ |__| |__] ___|
-
   // Retrieve a detailed description of the specified club id
   def retrieveClub(club_id: Int): Club = {
     val request = Http(s"https://www.strava.com/api/v3/clubs/$club_id").header("Authorization", authString)
@@ -336,19 +324,10 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[List[ActivitySummary]]
   }
 
-  //  ____ ____ ____ ____
-  //  | __ |___ |__| |__/
-  //  |__] |___ |  | |  \
-
   def retrieveAthleteGear(gear_id: String): Gear = {
     val request = Http(s"https://www.strava.com/api/v3/gear/$gear_id").header("Authorization", authString)
     parse(request.asString.body).extract[Gear]
   }
-
-  //  ____ ____ ____ _  _ ____ _  _ ___ ____
-  //  [__  |___ | __ |\/| |___ |\ |  |  [__
-  //  ___] |___ |__] |  | |___ | \|  |  ___]
-
 
   def retrieveSegment(segment_id: Int): Segment = {
     val request = Http(s"https://www.strava.com/api/v3/segments/$segment_id").header("Authorization", authString)
@@ -401,11 +380,6 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[SegmentEffort]
   }
 
-  //  ____ ___ ____ ____ ____ _  _ ____
-  //  [__   |  |__/ |___ |__| |\/| [__
-  //  ___]  |  |  \ |___ |  | |  | ___]
-
-
   def retrieveActivityStream(activity_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
@@ -447,10 +421,6 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  //  _  _ ___  _    ____ ____ ___  ____
-  //  |  | |__] |    |  | |__| |  \ [__
-  //  |__| |    |___ |__| |  | |__/ ___]
-
   // Upload an activity from a file (requires Write permissions, untested)
   def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
                      trainer: Option[Int], data_type: String, external_id: Option[String], file: Array[Byte]): Boolean = {
@@ -472,10 +442,6 @@ class ScravaClient(accessToken: String) {
       case Failure(error) => throw new RuntimeException(s"Could not parse upload status: $error")
     }
   }
-
-  //  ____ _  _ ___ ____    ___  ____ ____ _ _  _ ____ ___ _ ____ _  _
-  //  |__| |  |  |  |  | __ |__] |__| | __ | |\ | |__|  |  | |  | |\ |
-  //  |  | |__|  |  |__|    |    |  | |__] | | \| |  |  |  | |__| | \|
 
   def getAll[A, B](f: (Option[Int], Option[Int], Option[Int], Option[Int]) => List[B]): List[B] = {
     var counter = 0
