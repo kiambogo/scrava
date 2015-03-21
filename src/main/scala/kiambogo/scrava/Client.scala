@@ -11,13 +11,13 @@ import kiambogo.scrava.models._
 import scala.util.{Failure, Success, Try}
 import scalaj.http.Http
 
-class ScravaClient(accessToken: String) {
+class ScravaClient(accessToken: String) extends Scrava {
 
   implicit val formats = DefaultFormats
   val authString = "Bearer " + accessToken
 
   // List an athlete's friends. Returns current athlete's friends if athlete_id left null
-  def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
+  override def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = if (!athlete_id.isDefined) {
       //Return current authenticated athlete's friends
       Http(s"https://www.strava.com/api/v3/athlete/friends").header("Authorization", authString)
@@ -34,7 +34,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List an athlete's followers. Returns current athlete's followers if athlete_id left null
-  def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
+  override def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = if (!athlete_id.isDefined) {
       //Return current authenticated athlete's followers
       Http(s"https://www.strava.com/api/v3/athlete/followers").header("Authorization", authString)
@@ -51,7 +51,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List mutual followings for current athlete and specified athlete by athlete_id
-  def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
+  override def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/athletes/$athlete_id/both-following").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -62,7 +62,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Retrieve a specified Athlete. Returns current athlete if athlete_id left null
-  def retrieveAthlete(athlete_id: Option[Int] = None): Either[DetailedAthlete, AthleteSummary] = {
+  override def retrieveAthlete(athlete_id: Option[Int] = None): Either[DetailedAthlete, AthleteSummary] = {
     if (!athlete_id.isDefined) {
       //Return current authenticated athlete
       val request = Http(s"https://www.strava.com/api/v3/athlete").header("Authorization", authString)
@@ -81,7 +81,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Update an athlete's properties (requires Write permissions, untested)
-  def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): DetailedAthlete = {
+  override def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): DetailedAthlete = {
     val request = Http("https://www.strava.com/api/v3/athlete").header("Authorization", authString).method("put")
       .postForm(Seq(("city", city), ("state", state), ("country", country), ("sex", sex), ("weight", weight.toString)))
     Try {
@@ -93,7 +93,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List an athlete's KOMs
-  def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, resultsPerPage: Option[Int] = None): List[SegmentEffort] = {
+  override def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, resultsPerPage: Option[Int] = None): List[SegmentEffort] = {
     //Return specified athlete followers
     var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/koms").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "resultsPerPage" -> resultsPerPage)
@@ -105,7 +105,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List an athlete's stats 
-  def listAthleteStats(athlete_id: Int): Stats = {
+  override def listAthleteStats(athlete_id: Int): Stats = {
     //Return specified athlete followers
     var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/stats").header("Authorization", authString)
     Try { parse(request.asString.body).extract[Stats] } match {
@@ -115,7 +115,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List all comments from an activity
-  def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments] = {
+  override def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments] = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/comments").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -128,7 +128,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List the athletes who have 'kudosed' the specified activity
-  def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
+  override def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/kudos").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -141,7 +141,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List photos associated with a specified activity
-  def listActivityPhotos(id: Int): List[Photo] = {
+  override def listActivityPhotos(id: Int): List[Photo] = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id/photos")
     if (request.asString.isSuccess) {
       Try {
@@ -154,7 +154,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Create an activity (requires Write permissions, untested)
-  def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int,
+  override def createActivity(name: String, `type`: String, startDateLocal: DateTime, elapsedTime: Int,
                      description: Option[String], distance: Option[Float]): Activity = {
     val request = Http("https://www.strava.com/api/v3/activities").header("Authorization", authString).method("post")
       .postForm(Seq(("name", name),("elapsed_time",elapsedTime.toString), ("distance", distance.get.toString), ("start_date_local", startDateLocal.toString(ISODateTimeFormat.dateTime())),
@@ -166,7 +166,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Retrieve detailed information about a specified activity
-  def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity = {
+  override def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString)
     Map[String, Option[Boolean]]("includeEfforts" -> includeEfforts)
       .map(params => params._2.map(opt => {
@@ -210,7 +210,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Update an activity (requires Write permissions, untested)
-  def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
+  override def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
                      trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Activity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString).method("put")
     val tempMap = Map[String, Option[Any]]("name" -> name, "type" -> `type`, "private" -> `private`, "commute" -> commute,
@@ -224,7 +224,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Delete an activity (requires Write permissions, untested)
-  def deleteActivity(id: Long): Boolean = {
+  override def deleteActivity(id: Long): Boolean = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
     Try {
       request.asString.statusLine.equals(204)
@@ -236,7 +236,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Lists activities associated with the currently authenticated athlete
-  def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None,
+  override def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None,
                             page: Option[Int] = None, per_page: Option[Int] = None): List[PersonalActivitySummary] = {
 
     var request = Http(s"https://www.strava.com/api/v3/athlete/activities").header("Authorization", authString)
@@ -251,7 +251,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // List activities associated with current athlete and his/her friends (activity feed from Strava)
-  def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
+  override def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
     var request = Http(s"https://www.strava.com/api/v3/activities/following").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -263,7 +263,7 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listActivityZones(id: Int): List[ActivityZones] = {
+  override def listActivityZones(id: Int): List[ActivityZones] = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id/zones").header("Authorization", authString)
     Try {
       parse(request.asString.body).extract[List[ActivityZones]]
@@ -273,7 +273,7 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listActivityLaps(activity_id: Int): List[LapEffort] = {
+  override def listActivityLaps(activity_id: Int): List[LapEffort] = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/laps").header("Authorization", authString)
     Try {
       parse(request.asString.body).extract[List[LapEffort]]
@@ -284,7 +284,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Retrieve a detailed description of the specified club id
-  def retrieveClub(club_id: Int): Club = {
+  override def retrieveClub(club_id: Int): Club = {
     val request = Http(s"https://www.strava.com/api/v3/clubs/$club_id").header("Authorization", authString)
     Try {
       parse(request.asString.body).extract[Club]
@@ -295,7 +295,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Return a list of clubs that the authenticated athlete is part of
-  def listAthleteClubs: List[ClubSummary] = {
+  override def listAthleteClubs: List[ClubSummary] = {
     val request = Http(s"https://www.strava.com/api/v3/athlete/clubs").header("Authorization", authString)
     Try {
       parse(request.asString.body).extract[List[ClubSummary]]
@@ -305,7 +305,7 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
+  override def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/members").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
@@ -317,38 +317,38 @@ class ScravaClient(accessToken: String) {
     }
   }
 
-  def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
+  override def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/activities").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[ActivitySummary]]
   }
 
-  def retrieveAthleteGear(gear_id: String): Gear = {
+  override def retrieveAthleteGear(gear_id: String): Gear = {
     val request = Http(s"https://www.strava.com/api/v3/gear/$gear_id").header("Authorization", authString)
     parse(request.asString.body).extract[Gear]
   }
 
-  def retrieveSegment(segment_id: Int): Segment = {
+  override def retrieveSegment(segment_id: Int): Segment = {
     val request = Http(s"https://www.strava.com/api/v3/segments/$segment_id").header("Authorization", authString)
     parse(request.asString.body).extract[Segment]
   }
 
-  def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
+  override def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[SegmentSummary]]
   }
 
-  def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
+  override def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
     var request = Http(s"https://www.strava.com/api/v3/clubs/$athlete_id/activities").header("Authorization", authString)
     val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
     parse(request.asString.body).extract[List[SegmentSummary]]
   }
 
-  def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None,
+  override def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None,
                   end_date_local: Option[DateTime] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentEffort] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/all_efforts").header("Authorization", authString)
     val tempMap = Map[String, Option[Any]]("start_date_local" -> start_date_local, "end_date_local" -> end_date_local, "page" -> page, "per_page" -> per_page)
@@ -356,7 +356,7 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[List[SegmentEffort]]
   }
 
-  def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String],
+  override def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String],
                               weight_class: Option[String], following: Option[Boolean], club_id: Option[Int],
                               date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int]): SegmentLeaderBoards = {
     var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/leaderboard").header("Authorization", authString)
@@ -367,7 +367,7 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[SegmentLeaderBoards]
   }
 
-  def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed = {
+  override def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed = {
     var request = Http(s"https://www.strava.com/api/v3/segments/explore").header("Authorization", authString)
     val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "min_cat" -> min_cat, "max_cat" -> max_cat)
     request = request.param("bounds", bounds.mkString(","))
@@ -375,12 +375,12 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[SegmentCondensed]
   }
 
-  def retrieveSegmentEffort(effort_id: BigInt): SegmentEffort = {
+  override def retrieveSegmentEffort(effort_id: BigInt): SegmentEffort = {
     val request = Http(s"https://www.strava.com/api/v3/segment_efforts/$effort_id").header("Authorization", authString)
     parse(request.asString.body).extract[SegmentEffort]
   }
 
-  def retrieveActivityStream(activity_id: String, stream_types: Option[String] = None): List[Streams] = {
+  override def retrieveActivityStream(activity_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
     } else { stream_types.get }
@@ -388,7 +388,7 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
   }
 
-  def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): List[Streams] = {
+  override def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
     } else { stream_types.get }
@@ -396,7 +396,7 @@ class ScravaClient(accessToken: String) {
     parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
   }
 
-  def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams] = {
+  override def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude"
     } else { stream_types.get }
@@ -422,7 +422,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Upload an activity from a file (requires Write permissions, untested)
-  def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
+  override def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int],
                      trainer: Option[Int], data_type: String, external_id: Option[String], file: Array[Byte]): Boolean = {
     var request = Http(s"https://www.strava.com/api/v3/uploads").header("Authorization", authString).method("post")
     val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "name" -> name, "description" -> description,
@@ -434,7 +434,7 @@ class ScravaClient(accessToken: String) {
   }
 
   // Check the upload status of the activity (untested)
-  def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus = {
+  override def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus = {
     val request = Http(s"https://www.strava.com/api/v3/uploads/$upload_id").header("Authorization", authString)
       .params(Seq(("external_id", external_id), ("activity_id", activity_id.get.toString), ("status", status), ("error", error.get)))
     Try { parse(request.asString.body).extract[UploadStatus] } match {
