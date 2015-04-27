@@ -13,48 +13,77 @@ class ScravaClient(accessToken: String) extends Client {
   val authString = "Bearer " + accessToken
 
   // List an athlete's friends. Returns current athlete's friends if athlete_id left null
-  override def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
-    var request = if (!athlete_id.isDefined) {
-      //Return current authenticated athlete's friends
-      Http(s"https://www.strava.com/api/v3/athlete/friends").header("Authorization", authString)
-    } else {
-      //Return specified athlete friends
-      Http(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get+"/friends").header("Authorization", authString)
-    }
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
-      case Success(athletes) => athletes
-      case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends: $error")
-    }
+  override def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = if (!athlete_id.isDefined) {
+        //Return current authenticated athlete's friends
+        Http(s"https://www.strava.com/api/v3/athlete/friends")
+          .header("Authorization", authString)
+        } else {
+          //Return specified athlete friends
+          Http(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get+"/friends")
+            .header("Authorization", authString)
+        }
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
+          case Success(athletes) => athletes
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List an athlete's followers. Returns current athlete's followers if athlete_id left null
-  override def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
-    var request = if (!athlete_id.isDefined) {
-      //Return current authenticated athlete's followers
-      Http(s"https://www.strava.com/api/v3/athlete/followers").header("Authorization", authString)
-    } else {
-      //Return specified athlete followers
-      Http(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get+"/followers").header("Authorization", authString)
-    }
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
-      case Success(followers) => followers
-      case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete followers: $error")
-    }
+  override def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = if (!athlete_id.isDefined) {
+        //Return current authenticated athlete's followers
+        Http(s"https://www.strava.com/api/v3/athlete/followers").header("Authorization", authString)
+        } else {
+          //Return specified athlete followers
+          Http(s"https://www.strava.com/api/v3/athletes/"+athlete_id.get+"/followers").header("Authorization", authString)
+        }
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
+          case Success(followers) => followers
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete followers: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List mutual followings for current athlete and specified athlete by athlete_id
-  override def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/athletes/$athlete_id/both-following").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
-      case Success(followings) => followings
-      case Failure(error) => throw new RuntimeException(s"Could not parse list of mutual followers: $error")
-    }
+  override def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/athletes/$athlete_id/both-following").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
+          case Success(followings) => followings
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of mutual followers: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // Retrieve a specified Athlete. Returns current athlete if athlete_id left null
@@ -89,15 +118,24 @@ class ScravaClient(accessToken: String) extends Client {
   }
 
   // List an athlete's KOMs
-  override def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, resultsPerPage: Option[Int] = None): List[SegmentEffort] = {
-    //Return specified athlete followers
-    var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/koms").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "resultsPerPage" -> resultsPerPage)
-    tempMap.map(params => params._2 map (opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try { parse(request.asString.body).extract[List[SegmentEffort]] } match {
-      case Success(koms) => koms
-      case Failure(error) => throw new RuntimeException(s"Could not parse athlete KOMs: $error")
-    }
+  override def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentEffort] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      //Return specified athlete followers
+      var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/koms").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[SegmentEffort]] } match {
+          case Success(koms) => koms
+          case Failure(error) => throw new RuntimeException(s"Could not parse athlete KOMs: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List an athlete's stats
@@ -111,29 +149,49 @@ class ScravaClient(accessToken: String) extends Client {
   }
 
   // List all comments from an activity
-  override def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments] = {
-    var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/comments").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try {
-      parse(request.asString.body).extract[List[ActivityComments]]
-    } match {
-      case Success(comments) => comments
-      case Failure(error) => throw new RuntimeException(s"Could not parse activity comments: $error")
-    }
+  override def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivityComments] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/comments").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try {
+          parse(request.asString.body).extract[List[ActivityComments]]
+          } match {
+            case Success(comments) => comments
+            case Failure(error) => throw new RuntimeException(s"Could not parse activity comments: $error")
+          }
+
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List the athletes who have 'kudosed' the specified activity
-  override def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/kudos").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try {
-      parse(request.asString.body).extract[List[AthleteSummary]]
-    } match {
-      case Success(athleteList) => athleteList
-      case Failure(error) => throw new RuntimeException(s"Could not parse list of kudosers for activity: $error")
-    }
+  override def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/kudos").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try {
+          parse(request.asString.body).extract[List[AthleteSummary]]
+          } match {
+            case Success(athleteList) => athleteList
+            case Failure(error) => throw new RuntimeException(s"Could not parse list of kudosers for activity: $error")
+          }
+
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List photos associated with a specified activity
@@ -188,16 +246,12 @@ class ScravaClient(accessToken: String) extends Client {
       }
     } else {
       if (parse(request.asString.body).\("athlete").\("resource_state").extract[Int] == 2) {
-        Try {
-          parse(request.asString.body).extract[ActivitySummary]
-        } match {
+        Try { parse(request.asString.body).extract[ActivitySummary] } match {
           case Success(activity) => activity
           case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
         }
       } else {
-        Try {
-          parse(request.asString.body).extract[PersonalActivitySummary]
-        } match {
+        Try { parse(request.asString.body).extract[PersonalActivitySummary] } match {
           case Success(activitySummary) => activitySummary
           case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary: $error")
         }
@@ -222,41 +276,50 @@ class ScravaClient(accessToken: String) extends Client {
   // Delete an activity (requires Write permissions, untested)
   override def deleteActivity(id: Long): Boolean = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
-    Try {
-      request.asString.statusLine.equals(204)
-    } match {
-      case Success(bool) => bool
-      case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
-    }
-
+      Try { request.asString.statusLine.equals(204) } match {
+        case Success(bool) => bool
+        case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
+      }
   }
 
   // Lists activities associated with the currently authenticated athlete
-  override def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None,
-                            page: Option[Int] = None, per_page: Option[Int] = None): List[PersonalActivitySummary] = {
-
-    var request = Http(s"https://www.strava.com/api/v3/athlete/activities").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("before" -> before, "after" -> after, "page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try {
-      parse(request.asString.body).extract[List[PersonalActivitySummary]]
-    } match {
-      case Success(activities) => activities
-      case Failure(error) => throw new RuntimeException(s"Could not parse list of activities: $error")
-    }
+  override def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[PersonalActivitySummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/athlete/activities").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[PersonalActivitySummary]] } match {
+          case Success(activities) => activities
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of activities: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   // List activities associated with current athlete and his/her friends (activity feed from Strava)
-  override def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/activities/following").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try {
-      parse(request.asString.body).extract[List[ActivitySummary]]
-    } match {
-      case Success(activities) => activities
-      case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities: $error")
-    }
+  override def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivitySummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/activities/following").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[ActivitySummary]] } match {
+          case Success(activities) => activities
+          case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   override def listActivityZones(id: Int): List[ActivityZones] = {
@@ -301,23 +364,39 @@ class ScravaClient(accessToken: String) extends Client {
     }
   }
 
-  override def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/members").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    Try {
-      parse(request.asString.body).extract[List[AthleteSummary]]
-    } match {
-      case Success(members) => members
-      case Failure(error) => throw new RuntimeException(s"Could not parse club members: $error")
-    }
+  override def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/members").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[AthleteSummary]] } match {
+          case Success(members) => members
+          case Failure(error) => throw new RuntimeException(s"Could not parse club members: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
-  override def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/activities").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    parse(request.asString.body).extract[List[ActivitySummary]]
+  override def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivitySummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/clubs/$club_id/activities").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        parse(request.asString.body).extract[List[ActivitySummary]]
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
   override def retrieveAthleteGear(gear_id: String): Gear = {
@@ -330,37 +409,77 @@ class ScravaClient(accessToken: String) extends Client {
     parse(request.asString.body).extract[Segment]
   }
 
-  override def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    parse(request.asString.body).extract[List[SegmentSummary]]
+  override def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        Try { parse(request.asString.body).extract[List[SegmentSummary]] } match {
+          case Success(segments) => segments
+          case Failure(error) => throw new RuntimeException(s"Could not parse starred segments: $error")
+        }
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
-  override def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary] = {
-    var request = Http(s"https://www.strava.com/api/v3/clubs/$athlete_id/activities").header("Authorization", authString)
-    val tempMap = Map[String, Option[Int]]("page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    parse(request.asString.body).extract[List[SegmentSummary]]
+  override def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentSummary] = {
+    var counter = 0
+    Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/clubs/$athlete_id/activities").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        parse(request.asString.body).extract[List[SegmentSummary]]
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
 
-  override def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None,
-                  end_date_local: Option[DateTime] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentEffort] = {
+  override def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None, end_date_local: Option[DateTime] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentEffort] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/all_efforts").header("Authorization", authString)
-    val tempMap = Map[String, Option[Any]]("start_date_local" -> start_date_local, "end_date_local" -> end_date_local, "page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
+      start_date_local.map(s => request = request.param("start_date_local", s.toString))
+      end_date_local.map(s => request = request.param("end_date_local", s.toString))
+      page.map(p => request = request.param("page", p.toString))
+      per_page.map(pp => request = request.param("per_page", pp.toString))
     parse(request.asString.body).extract[List[SegmentEffort]]
   }
 
-  override def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String],
-                              weight_class: Option[String], following: Option[Boolean], club_id: Option[Int],
-                              date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int]): SegmentLeaderBoards = {
-    var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/leaderboard").header("Authorization", authString)
-    val tempMap = Map[String, Option[Any]]("gender" -> gender, "age_group" -> age_group, "weight_class" -> weight_class,
-      "following" -> following, "club_id" -> club_id, "date_range" -> date_range, "context_entries" -> context_entries,
-      "page" -> page, "per_page" -> per_page)
-    tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    parse(request.asString.body).extract[SegmentLeaderBoards]
+  override def listSegmentLeaderboards(segment_id: String, gender: Option[String] = None, age_group: Option[String] = None, weight_class: Option[String] = None, following: Option[Boolean] = None, club_id: Option[Int] = None, date_range: Option[String] = None, context_entries: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): SegmentLeaderBoards = {
+    var counter = 0
+    var limit = 0
+    val entries = Iterator.continually {
+      counter = counter + 1
+      var request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/leaderboard").header("Authorization", authString)
+        if (retrieveAll) {
+          request = request.param("page", counter.toString)
+          request = request.param("per_page", "200")
+        } else {
+          page.map(p => request = request.param("page", p.toString))
+          per_page.map(pp => request = request.param("per_page", pp.toString))
+        }
+        gender.map(g => request = request.param("gender", g))
+        age_group.map(g => request = request.param("age_group", g))
+        weight_class.map(g => request = request.param("weight_class", g))
+        following.map(g => request = request.param("following", g.toString))
+        club_id.map(g => request = request.param("club_id", g.toString))
+        date_range.map(g => request = request.param("date_range", g))
+        context_entries.map(g => request = request.param("context_entries", g.toString))
+
+        val body = parse(request.asString.body)
+        val count = (body \\ "entry_count").extract[Int]
+        limit = count/200
+        (body \\ "entries").extract[List[LeaderBoardEntry]]
+    }.takeWhile(_.size != 0 && (retrieveAll || counter == 1) && counter <= limit).toList.flatten
+    SegmentLeaderBoards(entries.size, entries)
   }
 
   override def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed = {
@@ -437,54 +556,6 @@ class ScravaClient(accessToken: String) extends Client {
       case Success(status) => status
       case Failure(error) => throw new RuntimeException(s"Could not parse upload status: $error")
     }
-  }
-
-  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int], Option[Int]) => List[B]): List[B] = {
-    var counter = 0
-    Iterator.continually {
-      counter = counter + 1
-      curry4(f)(None)(None)(Some(200))(Some(counter))
-    }.takeWhile(_.size != 0).toList.flatten
-  }
-
-  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int]) => List[B], id: Option[Int]): List[B] = {
-    var counter = 0
-    Iterator.continually {
-      counter = counter + 1
-      curry2optId(f)(Some(200))(id)(Some(counter))
-    }.takeWhile(_.size != 0).toList.flatten
-  }
-
-  def getAll[A, B](f: (Int, Option[Int], Option[Int]) => List[B], id: Int): List[B] = {
-    var counter = 0
-    Iterator.continually {
-      counter = counter + 1
-      curry2id(f)(Some(200))(id)(Some(counter))
-    }.takeWhile(_.size != 0).toList.flatten
-  }
-
-  def getAll[A, B](f: (Option[Int], Option[Int]) => List[B]): List[B] = {
-    var counter = 0
-    Iterator.continually {
-      counter = counter + 1
-      curry2(f)(Some(200))(Some(counter))
-    }.takeWhile(_.size != 0).toList.flatten
-  }
-
-  private def curry4[A, B, C, E, D](f: (A, B, C, D) => E): A => B => D => C => E = {
-    { (a: A) => { (b: B) => { (d: D) => { (c: C) => f(a, b, c, d) } } } }
-  }
-
-  private def curry2id[A, B, C, D](f: (Int, B, C) => D): C => Int => B => D = {
-    { (c: C) => { (a: Int) => { (b: B) => f(a, b, c) } } }
-  }
-
-  private def curry2optId[A, B, C, D](f: (Option[Int], B, C) => D): C => Option[Int] => B => D = {
-    { (c: C) => { (a: Option[Int]) => { (b: B) => f(a, b, c) } } }
-  }
-
-  private def curry2[A, B, C](f: (A, B) => C): B => A => C = {
-    { (b: B) => { (a: A) => f(a, b) } }
   }
 }
 

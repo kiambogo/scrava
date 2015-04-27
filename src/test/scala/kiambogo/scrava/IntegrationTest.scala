@@ -105,8 +105,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve a list of club activities" in {
     val activities = testClient.listClubActivities(45255)
-    println(activities)
-    activities.exists(a => a.id == 257651693) should equal(true)
+    activities.exists(a => a.id == 270922814) should equal(true)
   }
 
 //  TODO

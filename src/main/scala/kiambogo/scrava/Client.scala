@@ -4,23 +4,23 @@ import kiambogo.scrava.models._
 import org.joda.time.DateTime
 
 trait Client {
-  def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary]
+  def listAthleteFriends(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary]
 
-  def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary]
+  def listAthleteFollowers(athlete_id: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary]
 
-  def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary]
+  def listMutualFollowing(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary]
 
   def retrieveAthlete(athlete_id: Option[Int] = None): Either[DetailedAthlete, AthleteSummary]
 
   def updateAthlete(city: String, state: String, country: String, sex: String, weight: Float): DetailedAthlete
 
-  def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, resultsPerPage: Option[Int] = None): List[SegmentEffort]
+  def listAthleteKOMs(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentEffort]
 
   def listAthleteStats(athlete_id: Int): Stats
 
-  def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivityComments]
+  def listActivityComments(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivityComments]
 
-  def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary]
+  def listActivityKudoers(activity_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary]
 
   def listActivityPhotos(id: Int): List[Photo]
 
@@ -32,9 +32,9 @@ trait Client {
 
   def deleteActivity(id: Long): Boolean
 
-  def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[PersonalActivitySummary]
+  def listAthleteActivities(before: Option[Int] = None, after: Option[Int] = None, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[PersonalActivitySummary]
 
-  def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary]
+  def listFriendsActivities(page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivitySummary]
 
   def listActivityZones(id: Int): List[ActivityZones]
 
@@ -44,21 +44,21 @@ trait Client {
 
   def listAthleteClubs: List[ClubSummary]
 
-  def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[AthleteSummary]
+  def listClubMembers(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[AthleteSummary]
 
-  def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[ActivitySummary]
+  def listClubActivities(club_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[ActivitySummary]
 
   def retrieveAthleteGear(gear_id: String): Gear
 
   def retrieveSegment(segment_id: Int): Segment
 
-  def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary]
+  def listAthleteStarredSegments(page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentSummary]
 
-  def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentSummary]
+  def listStarredSegments(athlete_id: Int, page: Option[Int] = None, per_page: Option[Int] = None, retrieveAll: Boolean = false): List[SegmentSummary]
 
   def listEfforts(segment_id: Int, athlete_id: Option[Int] = None, start_date_local: Option[DateTime] = None, end_date_local: Option[DateTime] = None, page: Option[Int] = None, per_page: Option[Int] = None): List[SegmentEffort]
 
-  def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String], weight_class: Option[String], following: Option[Boolean], club_id: Option[Int], date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int]): SegmentLeaderBoards
+  def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String], weight_class: Option[String], following: Option[Boolean], club_id: Option[Int], date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int], retrieveAll: Boolean = false): SegmentLeaderBoards
 
   def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed
 
@@ -73,13 +73,5 @@ trait Client {
   def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int], trainer: Option[Int], data_type: String, external_id: Option[String], file: Array[Byte]): Boolean
 
   def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus
-
-  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int], Option[Int]) => List[B]): List[B]
-
-  def getAll[A, B](f: (Option[Int], Option[Int], Option[Int]) => List[B], id: Option[Int]): List[B]
-
-  def getAll[A, B](f: (Int, Option[Int], Option[Int]) => List[B], id: Int): List[B]
-
-  def getAll[A, B](f: (Option[Int], Option[Int]) => List[B]): List[B]
 }
 

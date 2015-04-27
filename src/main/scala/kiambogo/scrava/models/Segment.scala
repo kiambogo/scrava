@@ -73,7 +73,7 @@ case class LeaderBoardEntry(
   athlete_id: Int,
   athlete_gender: String,
   average_hr: Option[Float],
-  average_watts: Float,
+  average_watts: Option[Float],
   distance: Float,
   elapsed_time: Int,
   moving_time: Int,
@@ -82,4 +82,5 @@ case class LeaderBoardEntry(
   activity_id: Int,
   effort_id: Int,
   rank: Int,
+  neighborhood_index: Int, 
   athlete_profile: String)
