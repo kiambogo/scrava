@@ -3,7 +3,12 @@ package kiambogo.scrava.models
 /**
  * Created by christopher on 2014-10-07.
  */
-sealed trait Streams
+sealed trait Streams {
+  val `type`: String
+  val data: List[Any]
+  val series_type: String
+  val original_size: Int
+  val resolution: String }
 
 case class LatLng(
   `type`: String = "latlng",

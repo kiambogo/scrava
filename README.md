@@ -16,22 +16,7 @@ To retrieve perform these functions for a particular athlete/activity/etc, simpl
 	
 ###Auto-Pagination
 ---------------------
-The Strava API offers the ability to page through result sets when the corresponding result set to a request is very large. Scrava offers the ability to perform auto-pagination, fetching the entire result set and merging into a single List. To utilize this, invoke the `getAll()` higher order function, passing into it the function you wish to invoke. You can pass in other required parameters as needed.
-
-For example, if you want to retrieve all the activities of the current athlete
-```scala
-    val client = new ScravaClient("[accessToken]")
-    client.getAll(client.listAthleteActivities _)
-```
-
-or if you want to list all the athletes you are mutually following with a particular athlete:
-
-```scala
-client.getAll(client.listMutualFollowing _, [athlete_id])
-```
-where athlete_id is the particular Athlete ID you wish to find mutual followers for, and is a parameter to the `listMutualFollowing()` function.
-
-The underscore at the end marks it as a partially applied function, leaving the rest of the parameters to be curried. 
+The Strava API offers the ability to page through result sets when the corresponding result set to a request is very large. Scrava offers the ability to perform auto-pagination, fetching the entire result set and merging into a single List. To utilize this, simply pass in `retrieveAll = true` into the respective function.
 
 -----------------------------
 **Note:** The functions requiring Write permissions (`updateAthlete()`, `createActivity()`, `updateActivity()`, etc) are untested at this time. 
