@@ -500,7 +500,7 @@ class ScravaClient(accessToken: String) extends Client {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
     } else { stream_types.get }
     val request = Http(s"https://www.strava.com/api/v3/activities/$activity_id/streams/"+types).header("Authorization", authString).param("resolution", "high")
-    parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
+      parse(request.asString.body).extract[List[JObject]].map(parseStream(_)).flatten
   }
 
   override def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): List[Streams] = {
@@ -508,7 +508,7 @@ class ScravaClient(accessToken: String) extends Client {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"
     } else { stream_types.get }
     val request = Http(s"https://www.strava.com/api/v3/segment_efforts/$effort_id/streams/"+types).header("Authorization", authString).param("resolution", "high")
-    parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
+      parse(request.asString.body).extract[List[JObject]].map(parseStream(_)).flatten
   }
 
   override def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams] = {
@@ -516,23 +516,28 @@ class ScravaClient(accessToken: String) extends Client {
       "time,latlng,distance,altitude"
     } else { stream_types.get }
     val request = Http(s"https://www.strava.com/api/v3/segments/$segment_id/streams/"+types).header("Authorization", authString).param("resolution", "high")
-    parse(request.asString.body).extract[List[JObject]].map(parseStream(_))
+    parse(request.asString.body).extract[List[JObject]].map(parseStream(_)).flatten
   }
 
-  def parseStream(streamData: JValue): Streams = {
-    val dataType = streamData.\("type").extract[String]
-    dataType.replace("\"","") match {
-      case "time" => streamData.extract[Time]
-      case "latlng" => streamData.extract[LatLng]
-      case "distance" => streamData.extract[Distance]
-      case "altitude" => streamData.extract[Altitude]
-      case "velocity_smooth" => streamData.extract[Velocity]
-      case "heartrate" => streamData.extract[Heartrate]
-      case "cadence" => streamData.extract[Cadence]
-      case "watts" => streamData.extract[Watts]
-      case "temp" => streamData.extract[Temp]
-      case "moving" => streamData.extract[Moving]
-      case "grade_smooth" => streamData.extract[Grade]
+  def parseStream(streamData: JValue): Option[Streams] = {
+    Try {
+      val dataType = streamData.\("type").extract[String]
+      dataType.replace("\"","") match {
+        case "time" => streamData.extract[Time]
+        case "latlng" => streamData.extract[LatLng]
+        case "distance" => streamData.extract[Distance]
+        case "altitude" => streamData.extract[Altitude]
+        case "velocity_smooth" => streamData.extract[Velocity]
+        case "heartrate" => streamData.extract[Heartrate]
+        case "cadence" => streamData.extract[Cadence]
+        case "watts" => streamData.extract[Watts]
+        case "temp" => streamData.extract[Temp]
+        case "moving" => streamData.extract[Moving]
+        case "grade_smooth" => streamData.extract[Grade]
+      }
+    } match {
+      case Success(a) => Some(a)
+      case Failure(e) => None 
     }
   }
 
