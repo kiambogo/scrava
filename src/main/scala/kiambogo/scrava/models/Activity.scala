@@ -146,8 +146,10 @@ case class PersonalActivitySummary(
   average_temp: Option[Int],
   average_watts: Option[Float],
   kilojoules: Option[Float],
+  device_watts: Option[Boolean] = None,
   average_heartrate: Option[Float],
   max_heartrate: Option[Float],
+  total_photo_count: Int,
   truncated: Option[Int],
   has_kudoed: Boolean,
   workout_type: Option[Int]) extends Activity

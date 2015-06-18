@@ -1,8 +1,5 @@
 package kiambogo.scrava.models
 
-/**
- * Created by christopher on 2014-10-07.
- */
 sealed trait Streams {
   val `type`: String
   val data: List[Any]
@@ -12,7 +9,7 @@ sealed trait Streams {
 
 case class LatLng(
   `type`: String = "latlng",
-  data: List[List[Double]] = List(),
+  data: List[List[Float]] = List(),
   series_type: String = "distance",
   original_size: Int = 0,
   resolution: String = "high") extends Streams
@@ -61,6 +58,13 @@ case class Cadence(
 
 case class Watts(
   `type`: String = "watts",
+  data: List[Int] = List(),
+  series_type: String = "distance",
+  original_size: Int = 0,
+  resolution: String = "high") extends Streams
+
+case class WattsCalc(
+  `type`: String = "watts_calc",
   data: List[Int] = List(),
   series_type: String = "distance",
   original_size: Int = 0,

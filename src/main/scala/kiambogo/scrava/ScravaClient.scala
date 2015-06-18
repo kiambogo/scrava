@@ -531,6 +531,7 @@ class ScravaClient(accessToken: String) extends Client {
         case "heartrate" => streamData.extract[Heartrate]
         case "cadence" => streamData.extract[Cadence]
         case "watts" => streamData.extract[Watts]
+        case "watts_calc" => streamData.extract[Watts]
         case "temp" => streamData.extract[Temp]
         case "moving" => streamData.extract[Moving]
         case "grade_smooth" => streamData.extract[Grade]
