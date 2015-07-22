@@ -48,7 +48,6 @@ case class PersonalDetailedActivity(
   kilojoules: Option[Float] = None,
   average_heartrate: Option[Float] = None,
   max_heartrate: Option[Float] = None,
-  truncated: Option[Int] = None,
   has_kudoed: Boolean,
   description: Option[String] = None,
   calories: Option[Float] = None,
@@ -99,7 +98,6 @@ case class DetailedActivity(
   kilojoules: Option[Float] = None,
   average_heartrate: Option[Float] = None,
   max_heartrate: Option[Float] = None,
-  truncated: Option[Int] = None,
   has_kudoed: Boolean,
   description: Option[String] = None,
   calories: Option[Float] = None,
@@ -150,7 +148,6 @@ case class PersonalActivitySummary(
   average_heartrate: Option[Float],
   max_heartrate: Option[Float],
   total_photo_count: Int,
-  truncated: Option[Int],
   has_kudoed: Boolean,
   workout_type: Option[Int]) extends Activity
 
@@ -194,7 +191,7 @@ case class ActivitySummary(
   kilojoules: Option[Float],
   average_heartrate: Option[Float],
   max_heartrate: Option[Float],
-  truncated: Option[Int],
+  total_photo_count: Int,
   has_kudoed: Boolean,
   workout_type: Option[Int]) extends Activity
 

@@ -2,9 +2,9 @@ name := "Scrava"
 
 organization := "kiambogo"
 
-version := "1.1.3"
+version := "1.1.4"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "1.1.0",

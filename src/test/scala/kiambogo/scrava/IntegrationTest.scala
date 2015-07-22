@@ -78,11 +78,6 @@ class IntegrationTest extends FlatSpec with Matchers {
     activities.size should equal(30)
   }
 
-  it should "retrieve activity zones" in {
-    val zones = testClient.listActivityZones(103221154)
-    zones(0).score should equal(Some(12))
-  }
-
   it should "retrieve activity laps" in {
     val laps = testClient.listActivityLaps(103373338)
     laps(0).name should equal("Lap 1")
