@@ -100,8 +100,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve a list of club activities" in {
     val activities = testClient.listClubActivities(45255)
-    println(activities)
-    activities.size should equal(0)
+    activities.size should equal(2)
   }
 
 //  TODO
