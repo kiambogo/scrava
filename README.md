@@ -2,7 +2,7 @@
 
 A lightweight 	Scala client for the Strava API built upon ScalaJ-HTTP library and Lift JSON.
 
-[![Build Status](https://travis-ci.org/kiambogo/Scrava.svg?branch=master)](https://travis-ci.org/kiambogo/Scrava)
+[![Build Status](https://travis-ci.org/kiambogo/scrava.svg?branch=master)](https://travis-ci.org/kiambogo/scrava)
 
 ###Sample Code
 ---------------------
