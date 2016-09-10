@@ -483,12 +483,12 @@ class ScravaClient(accessToken: String) extends Client {
     SegmentLeaderBoards(entries.size, entries)
   }
 
-  override def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed = {
+  override def exploreSegments(bounds: List[Float], activity_type: Option[String] = None, min_cat: Option[Int] = None, max_cat: Option[Int] = None): List[SegmentCondensed] = {
     var request = Http(s"https://www.strava.com/api/v3/segments/explore").header("Authorization", authString)
     val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "min_cat" -> min_cat, "max_cat" -> max_cat)
     request = request.param("bounds", bounds.mkString(","))
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    (parseWithRateLimits(request) \\ "segments").extract[SegmentCondensed]
+    (parseWithRateLimits(request) \\ "segments").extract[List[SegmentCondensed]]
   }
 
   override def retrieveSegmentEffort(effort_id: BigInt): SegmentEffort = {
