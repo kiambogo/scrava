@@ -73,5 +73,7 @@ trait Client {
   def uploadActivity(activity_type: Option[String], name: Option[String], description: Option[String], `private`: Option[Int], trainer: Option[Int], data_type: String, external_id: Option[String], file: Array[Byte]): Boolean
 
   def checkUploadStatus(upload_id: Int, external_id: String, activity_id: Option[Int] = None, status: String, error: Option[String] = None): UploadStatus
+
+  def checkRateLimits(): RateLimit
 }
 

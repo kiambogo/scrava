@@ -2,7 +2,7 @@ name := "Scrava"
 
 organization := "kiambogo"
 
-version := "1.1.5"
+version := "git describe --dirty --tags --always".!!.stripPrefix("v").trim
 
 scalaVersion := "2.11.8"
 
