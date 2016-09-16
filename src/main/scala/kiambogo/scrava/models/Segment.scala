@@ -54,6 +54,7 @@ case class SegmentSummary(
 
 case class SegmentCondensed(
   id: Int,
+  resource_state: Int,
   name: String,
   climb_category: Int,
   climb_category_desc: String,
@@ -62,7 +63,8 @@ case class SegmentCondensed(
   end_latlng: List[Float],
   elev_difference: Float,
   distance: Float,
-  points: String)
+  points: String,
+  starred: Boolean)
 
 case class SegmentLeaderBoards(
   entry_count: Int,

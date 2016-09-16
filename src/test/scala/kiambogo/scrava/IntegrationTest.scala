@@ -109,6 +109,12 @@ class IntegrationTest extends FlatSpec with Matchers {
 //    gear.name should equal("burrito burner")
 //  }
 
+  it should "retrieve a list of segments based on bounds (explore)" in {
+    val bounds = List[Float](37.674887f, -122.595185f, 37.840461f, -122.280015f)
+    val segments = testClient.exploreSegments(bounds)
+    segments.size should equal(10)
+  }
+
   it should "retrieve a detailed segment" in {
     val segment = testClient.retrieveSegment(229781)
     segment.name should equal("Hawk Hill")

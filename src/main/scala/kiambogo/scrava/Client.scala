@@ -60,7 +60,7 @@ trait Client {
 
   def listSegmentLeaderboards(segment_id: String, gender: Option[String], age_group: Option[String], weight_class: Option[String], following: Option[Boolean], club_id: Option[Int], date_range: Option[String], context_entries: Option[Int], page: Option[Int], per_page: Option[Int], retrieveAll: Boolean = false): SegmentLeaderBoards
 
-  def segmentExplorer(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): SegmentCondensed
+  def exploreSegments(bounds: List[Float], activity_type: Option[String], min_cat: Option[Int], max_cat: Option[Int]): List[SegmentCondensed]
 
   def retrieveSegmentEffort(effort_id: BigInt): SegmentEffort
 
