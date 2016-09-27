@@ -504,6 +504,11 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[List[JObject]].map(parseStream(_)).flatten
   }
 
+  override def retrieveRouteStream(route_id: String): List[Streams] = {
+    val request = Http(s"https://www.strava.com/api/v3/routes/$route_id/streams").header("Authorization", authString)
+    parseWithRateLimits(request).extract[List[JObject]].map(parseStream(_)).flatten
+  }
+
   override def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): List[Streams] = {
     val types = if (!stream_types.isDefined) {
       "time,latlng,distance,altitude,velocity_smooth,heartrate,cadence,watts,temp,moving,grade_smooth"

@@ -66,6 +66,8 @@ trait Client {
 
   def retrieveActivityStream(activity_id: String, stream_types: Option[String] = None): List[Streams]
 
+  def retrieveRouteStream(route_id: String): List[Streams]
+
   def retrieveEffortStream(effort_id: String, stream_types: Option[String] = None): List[Streams]
 
   def retrieveSegmentStream(segment_id: String, stream_types: Option[String] = None): List[Streams]
