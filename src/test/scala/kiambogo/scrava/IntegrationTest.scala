@@ -133,8 +133,8 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve a segment stream" in {
     val stream = testClient.retrieveSegmentStream("229781", Some("latlng"))
-    stream(0).asInstanceOf[LatLng].resolution should equal("high")
-    stream(1).asInstanceOf[Distance].original_size should equal(114)
+    stream(0).asInstanceOf[LatLng].resolution should equal(Some("high"))
+    stream(1).asInstanceOf[Distance].original_size should equal(Some(114))
   }
 
 }
