@@ -2,7 +2,7 @@ name := "Scrava"
 
 organization := "kiambogo"
 
-version := "git describe --dirty --tags --always".!!.stripPrefix("v").trim
+version := Process("git describe --dirty --tags --always", baseDirectory.value).!!.stripPrefix("v").trim
 
 scalaVersion := "2.11.8"
 
