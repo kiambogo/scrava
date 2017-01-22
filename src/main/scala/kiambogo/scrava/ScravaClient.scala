@@ -488,7 +488,7 @@ class ScravaClient(accessToken: String) extends Client {
     val tempMap = Map[String, Option[Any]]("activity_type" -> activity_type, "min_cat" -> min_cat, "max_cat" -> max_cat)
     request = request.param("bounds", bounds.mkString(","))
     tempMap.map(params => params._2.map(opt => { request = request.param(params._1, params._2.get.toString) }))
-    (parseWithRateLimits(request) \\ "segments").extract[List[SegmentCondensed]]
+    (parseWithRateLimits(request) \ "segments").extract[List[SegmentCondensed]]
   }
 
   override def retrieveSegmentEffort(effort_id: BigInt): SegmentEffort = {

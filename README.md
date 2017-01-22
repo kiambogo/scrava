@@ -5,9 +5,9 @@ A lightweight 	Scala client for the Strava API built upon ScalaJ-HTTP library an
 [![Build Status](https://travis-ci.org/kiambogo/scrava.svg?branch=master)](https://travis-ci.org/kiambogo/scrava)
 
 ###Installation
-Scrava is currently built for Scala 2.11. To use scrava in an sbt project, add the following to your project file:
+Scrava is currently built for Scala 2.11 and 2.12. To use scrava in an sbt project, add the following to your project file:
 
-    libraryDependencies += "com.github.kiambogo" %% "scrava" % "1.2.2"
+    libraryDependencies += "com.github.kiambogo" %% "scrava" % "1.2.3"
 
 ###Sample Code
 ---------------------
