@@ -223,7 +223,7 @@ class ScravaClient(accessToken: String) extends Client {
   // Retrieve detailed information about a specified activity
   override def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString)
-    Map[String, Option[Boolean]]("includeEfforts" -> includeEfforts)
+    Map[String, Option[Boolean]]("include_all_efforts" -> includeEfforts)
       .map(params => params._2.map(opt => {
       request = request.param(params._1, params._2.get.toString)
     }))
@@ -289,7 +289,19 @@ class ScravaClient(accessToken: String) extends Client {
     Iterator.continually {
       counter = counter + 1
       var request = Http(s"https://www.strava.com/api/v3/athlete/activities").header("Authorization", authString)
-        if (retrieveAll) {
+
+
+      request = before match {
+        case Some(b) => request.param("before", b.toString)
+        case None => request
+      }
+
+      request = after match {
+        case Some(a) => request.param("after", a.toString)
+        case None => request
+      }
+
+      if (retrieveAll) {
           request = request.param("page", counter.toString)
           request = request.param("per_page", "200")
         } else {

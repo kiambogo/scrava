@@ -32,6 +32,11 @@ class IntegrationTest extends FlatSpec with Matchers {
     (activities map (_.id == 118293263) contains true) should equal(true)
   }
 
+  it should "retrieve activities with dates" in {
+    val activities = testClient.listAthleteActivities(before = Some(1501245821), after=Some(1435708800))
+    activities.size should equal(2)
+  }
+
   it should "retrieve followers" in {
     val followers = testClient.listAthleteFollowers()
     (followers map (_.id == 227615) contains true) should equal(true)
@@ -75,7 +80,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve friends activities" in {
     val activities = testClient.listFriendsActivities()
-    activities.size should equal(29)
+    activities.size should equal(30)
   }
 
   it should "retrieve activity laps" in {
