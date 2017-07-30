@@ -290,7 +290,6 @@ class ScravaClient(accessToken: String) extends Client {
       counter = counter + 1
       var request = Http(s"https://www.strava.com/api/v3/athlete/activities").header("Authorization", authString)
 
-
       request = before match {
         case Some(b) => request.param("before", b.toString)
         case None => request
