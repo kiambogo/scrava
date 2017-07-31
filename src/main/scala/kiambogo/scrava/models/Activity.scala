@@ -51,10 +51,10 @@ case class PersonalDetailedActivity(
   has_kudoed: Boolean,
   description: Option[String] = None,
   calories: Option[Float] = None,
-  segmentEfforts: List[SegmentEffort],
+  segment_efforts: List[SegmentEffort],
   splitsMetric: List[SplitMetrics],
   splitsStandard: List[SplitStandard],
-  bestEfforts: List[SegmentEffort]) extends Activity
+  best_efforts: List[SegmentEffort]) extends Activity
 
 case class DetailedActivity(
   id: Int,
@@ -101,10 +101,10 @@ case class DetailedActivity(
   has_kudoed: Boolean,
   description: Option[String] = None,
   calories: Option[Float] = None,
-  segmentEfforts: List[SegmentEffort],
+  segment_efforts: List[SegmentEffort],
   splitsMetric: List[SplitMetrics],
   splitsStandard: List[SplitStandard],
-  bestEfforts: List[SegmentEffort]) extends Activity
+  best_efforts: List[SegmentEffort]) extends Activity
 
 case class PersonalActivitySummary(
   id: Int,
