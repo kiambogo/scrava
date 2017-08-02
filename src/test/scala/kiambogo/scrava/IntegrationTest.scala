@@ -73,6 +73,16 @@ class IntegrationTest extends FlatSpec with Matchers {
     activity.id should equal(191823321)
   }
 
+  it should "retrieve activity with all efforts" in {
+    val activity = testClient.retrieveActivity(103373338, Some(true)).asInstanceOf[DetailedActivity]
+    activity.segment_efforts.size should equal(34)
+  }
+
+  it should "retrieve activity with efforts" in {
+    val activity = testClient.retrieveActivity(103373338).asInstanceOf[DetailedActivity]
+    activity.segment_efforts.size should equal(12)
+  }
+
   it should "retrieve activity photos" in {
     val photos = testClient.listActivityPhotos(118293263)
     photos.size should equal(0)

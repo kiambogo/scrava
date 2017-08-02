@@ -4,7 +4,7 @@ package kiambogo.scrava.models
  * Created by christopher on 2014-09-15.
  */
 case class SegmentEffort(
-  id: Int,
+  id: Long,
   resource_state: Int,
   name: String,
   activity: Map[String,Int],
