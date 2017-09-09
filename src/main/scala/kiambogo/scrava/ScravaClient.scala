@@ -20,7 +20,7 @@ class ScravaClient(accessToken: String) extends Client {
       counter = counter + 1
       var request = if (!athlete_id.isDefined) {
         //Return current authenticated athlete's friends
-        Http(s"https://www.strava.com/api/v3/athlete/friends")
+        Http("https://www.strava.com/api/v3/athlete/friends")
           .header("Authorization", authString)
         } else {
           //Return specified athlete friends
@@ -82,7 +82,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[AthleteSummary]] } match {
           case Success(followings) => followings
-          case Failure(error) => throw new RuntimeException(s"Could not parse list of mutual followers", error)
+          case Failure(error) => throw new RuntimeException("Could not parse list of mutual followers", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -278,7 +278,7 @@ class ScravaClient(accessToken: String) extends Client {
 
     Try { parseWithRateLimits(request).extract[PersonalDetailedActivity] } match {
       case Success(activity) => activity
-      case Failure(error) => throw new RuntimeException(s"Could not update activity", error)
+      case Failure(error) => throw new RuntimeException("Could not update activity", error)
     }
   }
 
@@ -287,7 +287,7 @@ class ScravaClient(accessToken: String) extends Client {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
       Try { request.asString.code == 204 } match {
         case Success(bool) => bool
-        case Failure(error) => throw new RuntimeException(s"Could not delete activity", error)
+        case Failure(error) => throw new RuntimeException("Could not delete activity", error)
       }
   }
 
@@ -369,7 +369,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[Club]
     } match {
       case Success(club) => club
-      case Failure(error) => throw new RuntimeException(s"Could not parse club", error)
+      case Failure(error) => throw new RuntimeException("Could not parse club", error)
     }
   }
 
@@ -433,7 +433,7 @@ class ScravaClient(accessToken: String) extends Client {
     var counter = 0
     Iterator.continually {
       counter = counter + 1
-      var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
+      var request = Http("https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
         if (retrieveAll) {
           request = request.param("page", counter.toString)
           request = request.param("per_page", "200")
