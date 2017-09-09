@@ -277,7 +277,7 @@ class ScravaClient(accessToken: String) extends Client {
   // Delete an activity (requires Write permissions, untested)
   override def deleteActivity(id: Long): Boolean = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
-      Try { request.asString.statusLine.equals(204) } match {
+      Try { request.asString.code == 204 } match {
         case Success(bool) => bool
         case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
       }
