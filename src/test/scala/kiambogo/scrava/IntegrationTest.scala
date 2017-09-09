@@ -5,8 +5,8 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class IntegrationTest extends FlatSpec with Matchers {
 
-  val testToken = "21b4fe41a815dd7de4f0cae7f04bbbf9aa0f9507"
-  val testClient = new ScravaClient(testToken)
+  private val testToken = "21b4fe41a815dd7de4f0cae7f04bbbf9aa0f9507"
+  private val testClient = new ScravaClient(testToken)
 
   "Scrava" should
     "retrieve Athlete profile" in {
@@ -18,7 +18,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve friends" in {
     val friends = testClient.listAthleteFriends()
-    (friends map (_.id == 227615) contains true) should equal(true)
+    friends.exists(_.id == 227615) should equal(true)
   }
 
   it should "retrieve gear" in {
@@ -29,7 +29,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve activities" in {
     val activities = testClient.listAthleteActivities()
-    (activities map (_.id == 118293263) contains true) should equal(true)
+    activities.exists(_.id == 118293263) should equal(true)
   }
 
   it should "retrieve activities with dates" in {
@@ -39,12 +39,12 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve followers" in {
     val followers = testClient.listAthleteFollowers()
-    (followers map (_.id == 227615) contains true) should equal(true)
+    followers.exists(_.id == 227615) should equal(true)
   }
 
   it should "retrieve mutual followings" in {
     val followers = testClient.listMutualFollowing(227615)
-    (followers map (_.id == 8758) contains true) should equal(true)
+    followers.exists(_.id == 8758) should equal(true)
   }
 
   it should "retrieve KOMs" in {
@@ -55,12 +55,12 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve activity comments" in {
     val comments = testClient.listActivityComments(118293263)
-    (comments map (_.text == "test comment") contains true) should equal(true)
+    comments.exists(_.text == "test comment") should equal(true)
   }
 
   it should "retrieve activity kudoers" in {
     val kudoers = testClient.listActivityKudoers(118293263)
-    (kudoers map (_.id == 3776) contains true) should equal(true)
+    kudoers.exists(_.id == 3776) should equal(true)
   }
 
   it should "retrieve activity details" in {
@@ -90,12 +90,12 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve friends activities" in {
     val activities = testClient.listFriendsActivities()
-    activities.size should equal(30)
+    activities.size should equal(28)
   }
 
   it should "retrieve activity laps" in {
     val laps = testClient.listActivityLaps(103373338)
-    laps(0).name should equal("Lap 1")
+    laps.head.name should equal("Lap 1")
   }
 
   it should "retrieve a club" in {
@@ -110,7 +110,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve a list of club members" in {
     val members = testClient.listClubMembers(45255)
-    (members map (_.id == 3545423) contains true) should equal(true)
+    members.exists(_.id == 3545423) should equal(true)
   }
 
   it should "retrieve a list of club activities" in {
@@ -137,13 +137,13 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve a list of athlete starred segments" in {
     val segments = testClient.listAthleteStarredSegments()
-    segments(0).name should equal("Hawk Hill")
+    segments.head.name should equal("Hawk Hill")
   }
 
   it should "retrieve a list of segment efforts" in {
     val efforts = testClient.listEfforts(229781)
-    efforts(0).name should equal("Hawk Hill")
-    efforts(0).elapsed_time should equal(769)
+    efforts.head.name should equal("Hawk Hill")
+    efforts.head.elapsed_time should equal(769)
   }
 
   it should "retrieve a segment stream" in {
@@ -151,5 +151,4 @@ class IntegrationTest extends FlatSpec with Matchers {
     stream(0).asInstanceOf[LatLng].resolution should equal(Some("high"))
     stream(1).asInstanceOf[Distance].original_size should equal(Some(114))
   }
-
 }
