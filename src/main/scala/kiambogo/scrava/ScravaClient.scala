@@ -260,15 +260,23 @@ class ScravaClient(accessToken: String) extends Client {
     }
   }
 
-  // Update an activity (requires Write permissions, untested)
-  override def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
-                     trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Activity = {
+  // Update an activity (requires Write permissions)
+  override def updateActivity(
+    activity_id: Long,
+    name: Option[String] = None,
+    `type`: Option[String] = None,
+    `private`: Option[Boolean] = None,
+    commute: Option[Boolean] = None,
+    trainer: Option[Boolean] = None,
+    gearId: Option[String] = None,
+    description: Option[String] = None
+  ): PersonalDetailedActivity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString).method("put")
     val tempMap = Map[String, Option[Any]]("name" -> name, "type" -> `type`, "private" -> `private`, "commute" -> commute,
       "trainer" -> trainer, "gear_id" -> gearId, "description" -> description)
-    tempMap.map(params => params._2.map(opt => { request = request.params((params._1, params._2.get.toString)) }))
+    tempMap.foreach(params => params._2.foreach(opt => { request = request.params((params._1, params._2.get.toString)) }))
 
-    Try { parseWithRateLimits(request).extract[DetailedActivity] } match {
+    Try { parseWithRateLimits(request).extract[PersonalDetailedActivity] } match {
       case Success(activity) => activity
       case Failure(error) => throw new RuntimeException(s"Could not update activity: $error")
     }
