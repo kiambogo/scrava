@@ -28,7 +28,7 @@ trait Client {
 
   def retrieveActivity(activity_id: Int, includeEfforts: Option[Boolean] = None): Activity
 
-  def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean], trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Activity
+  def updateActivity(activity_id: Long, name: Option[String] = None, `type`: Option[String] = None, `private`: Option[Boolean] = None, commute: Option[Boolean] = None, trainer: Option[Boolean] = None, gearId: Option[String] = None, description: Option[String] = None): PersonalDetailedActivity
 
   def deleteActivity(id: Long): Boolean
 

@@ -18,7 +18,7 @@ case class SegmentEffort(
   end_index: Int,
   average_heartrate: Option[Float],
   max_heartrate: Option[Int],
-  segment: SegmentSummary,
+  segment: Option[SegmentSummary],
   kom_rank: Option[Int],
   pr_rank: Option[Int]) {
 

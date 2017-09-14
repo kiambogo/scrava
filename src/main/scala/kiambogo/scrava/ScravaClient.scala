@@ -20,7 +20,7 @@ class ScravaClient(accessToken: String) extends Client {
       counter = counter + 1
       var request = if (!athlete_id.isDefined) {
         //Return current authenticated athlete's friends
-        Http(s"https://www.strava.com/api/v3/athlete/friends")
+        Http("https://www.strava.com/api/v3/athlete/friends")
           .header("Authorization", authString)
         } else {
           //Return specified athlete friends
@@ -36,7 +36,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[AthleteSummary]] } match {
           case Success(athletes) => athletes
-          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete friends", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -62,7 +62,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[AthleteSummary]] } match {
           case Success(followers) => followers
-          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete followers: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of athlete followers", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -82,7 +82,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[AthleteSummary]] } match {
           case Success(followings) => followings
-          case Failure(error) => throw new RuntimeException(s"Could not parse list of mutual followers: $error")
+          case Failure(error) => throw new RuntimeException("Could not parse list of mutual followers", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -94,14 +94,14 @@ class ScravaClient(accessToken: String) extends Client {
       val request = Http(s"https://www.strava.com/api/v3/athlete").header("Authorization", authString)
       Try { Left(parseWithRateLimits(request).extract[DetailedAthlete]) } match {
         case Success(athlete) => athlete
-        case Failure(error) => throw new RuntimeException(s"Could not parse Athlete: $error")
+        case Failure(error) => throw new RuntimeException(s"Could not parse Athlete", error)
       }
     } else {
       //Return specified athlete summary
       val request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id.get).header("Authorization", authString)
       Try { Right(parseWithRateLimits(request).extract[AthleteSummary]) } match {
         case Success(athleteSummary) => athleteSummary
-        case Failure(error) => throw new RuntimeException(s"Could not parse athleteSummary: $error")
+        case Failure(error) => throw new RuntimeException(s"Could not parse athleteSummary", error)
       }
     }
   }
@@ -114,7 +114,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[DetailedAthlete]
     } match {
       case Success(athlete) => athlete
-      case Failure(error) => throw new RuntimeException(s"Could not update Athlete: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not update Athlete", error)
     }
   }
 
@@ -134,7 +134,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[SegmentEffort]] } match {
           case Success(koms) => koms
-          case Failure(error) => throw new RuntimeException(s"Could not parse athlete KOMs: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse athlete KOMs", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -145,7 +145,7 @@ class ScravaClient(accessToken: String) extends Client {
     var request = Http(s"https://www.strava.com/api/v3/athletes/" + athlete_id + "/stats").header("Authorization", authString)
     Try { parseWithRateLimits(request).extract[Stats] } match {
       case Success(stats) => stats
-      case Failure(error) => throw new RuntimeException(s"Could not parse athlete stats: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse athlete stats", error)
     }
   }
 
@@ -166,7 +166,7 @@ class ScravaClient(accessToken: String) extends Client {
           parseWithRateLimits(request).extract[List[ActivityComments]]
           } match {
             case Success(comments) => comments
-            case Failure(error) => throw new RuntimeException(s"Could not parse activity comments: $error")
+            case Failure(error) => throw new RuntimeException(s"Could not parse activity comments", error)
           }
 
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
@@ -189,7 +189,7 @@ class ScravaClient(accessToken: String) extends Client {
           parseWithRateLimits(request).extract[List[AthleteSummary]]
           } match {
             case Success(athleteList) => athleteList
-            case Failure(error) => throw new RuntimeException(s"Could not parse list of kudosers for activity: $error")
+            case Failure(error) => throw new RuntimeException(s"Could not parse list of kudosers for activity", error)
           }
 
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
@@ -203,7 +203,7 @@ class ScravaClient(accessToken: String) extends Client {
         parseWithRateLimits(request).extract[List[Photo]]
       } match {
         case Success(photos) => photos
-        case Failure(error) => throw new RuntimeException(s"Could not parse list of photos: $error")
+        case Failure(error) => throw new RuntimeException(s"Could not parse list of photos", error)
       }
     } else List()
   }
@@ -216,7 +216,7 @@ class ScravaClient(accessToken: String) extends Client {
       ("type", `type`)))
     Try { parseWithRateLimits(request).extract[Activity] } match {
       case Success(activity) => activity
-      case Failure(error) => throw new RuntimeException("Could not create activity: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not create activity", error)
     }
   }
 
@@ -235,51 +235,59 @@ class ScravaClient(accessToken: String) extends Client {
           parseWithRateLimits(request).extract[DetailedActivity]
         } match {
           case Success(activity) => activity
-          case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse activity", error)
         }
       } else {
         Try {
           parseWithRateLimits(request).extract[PersonalDetailedActivity]
         } match {
           case Success(activitySummary) => activitySummary
-          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary", error)
         }
       }
     } else {
       if (parseWithRateLimits(request).\("athlete").\("resource_state").extract[Int] == 2) {
         Try { parseWithRateLimits(request).extract[ActivitySummary] } match {
           case Success(activity) => activity
-          case Failure(error) => throw new RuntimeException(s"Could not parse activity: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse activity", error)
         }
       } else {
         Try { parseWithRateLimits(request).extract[PersonalActivitySummary] } match {
           case Success(activitySummary) => activitySummary
-          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse personal activitySummary", error)
         }
       }
     }
   }
 
-  // Update an activity (requires Write permissions, untested)
-  override def updateActivity(activity_id: Long, name: Option[String], `type`: Option[String], `private`: Option[Boolean], commute: Option[Boolean],
-                     trainer: Option[Boolean], gearId: Option[String], description: Option[String]): Activity = {
+  // Update an activity (requires Write permissions)
+  override def updateActivity(
+    activity_id: Long,
+    name: Option[String] = None,
+    `type`: Option[String] = None,
+    `private`: Option[Boolean] = None,
+    commute: Option[Boolean] = None,
+    trainer: Option[Boolean] = None,
+    gearId: Option[String] = None,
+    description: Option[String] = None
+  ): PersonalDetailedActivity = {
     var request = Http(s"https://www.strava.com/api/v3/activities/$activity_id").header("Authorization", authString).method("put")
     val tempMap = Map[String, Option[Any]]("name" -> name, "type" -> `type`, "private" -> `private`, "commute" -> commute,
       "trainer" -> trainer, "gear_id" -> gearId, "description" -> description)
-    tempMap.map(params => params._2.map(opt => { request = request.params((params._1, params._2.get.toString)) }))
+    tempMap.foreach(params => params._2.foreach(opt => { request = request.params((params._1, params._2.get.toString)) }))
 
-    Try { parseWithRateLimits(request).extract[DetailedActivity] } match {
+    Try { parseWithRateLimits(request).extract[PersonalDetailedActivity] } match {
       case Success(activity) => activity
-      case Failure(error) => throw new RuntimeException(s"Could not update activity: $error")
+      case Failure(error) => throw new RuntimeException("Could not update activity", error)
     }
   }
 
   // Delete an activity (requires Write permissions, untested)
   override def deleteActivity(id: Long): Boolean = {
     val request = Http(s"https://www.strava.com/api/v3/activities/$id").method("delete")
-      Try { request.asString.statusLine.equals(204) } match {
+      Try { request.asString.code == 204 } match {
         case Success(bool) => bool
-        case Failure(error) => throw new RuntimeException(s"Could not delete activity: $error")
+        case Failure(error) => throw new RuntimeException("Could not delete activity", error)
       }
   }
 
@@ -309,7 +317,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[PersonalActivitySummary]] } match {
           case Success(activities) => activities
-          case Failure(error) => throw new RuntimeException(s"Could not parse list of activities: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse list of activities", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -329,7 +337,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[ActivitySummary]] } match {
           case Success(activities) => activities
-          case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse friends' activities", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -340,7 +348,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[List[ActivityZones]]
     } match {
       case Success(zones) => zones
-      case Failure(error) => throw new RuntimeException(s"Could not parse activty zones: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse activty zones", error)
     }
   }
 
@@ -350,7 +358,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[List[LapEffort]]
     } match {
       case Success(laps) => laps
-      case Failure(error) => throw new RuntimeException(s"Could not parse activty laps: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse activty laps", error)
     }
   }
 
@@ -361,7 +369,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[Club]
     } match {
       case Success(club) => club
-      case Failure(error) => throw new RuntimeException(s"Could not parse club: $error")
+      case Failure(error) => throw new RuntimeException("Could not parse club", error)
     }
   }
 
@@ -372,7 +380,7 @@ class ScravaClient(accessToken: String) extends Client {
       parseWithRateLimits(request).extract[List[ClubSummary]]
     } match {
       case Success(clubs) => clubs
-      case Failure(error) => throw new RuntimeException(s"Could not parse clubs: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse clubs", error)
     }
   }
 
@@ -390,7 +398,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[AthleteSummary]] } match {
           case Success(members) => members
-          case Failure(error) => throw new RuntimeException(s"Could not parse club members: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse club members", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -425,7 +433,7 @@ class ScravaClient(accessToken: String) extends Client {
     var counter = 0
     Iterator.continually {
       counter = counter + 1
-      var request = Http(s"https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
+      var request = Http("https://www.strava.com/api/v3/segments/starred").header("Authorization", authString)
         if (retrieveAll) {
           request = request.param("page", counter.toString)
           request = request.param("per_page", "200")
@@ -435,7 +443,7 @@ class ScravaClient(accessToken: String) extends Client {
         }
         Try { parseWithRateLimits(request).extract[List[SegmentSummary]] } match {
           case Success(segments) => segments
-          case Failure(error) => throw new RuntimeException(s"Could not parse starred segments: $error")
+          case Failure(error) => throw new RuntimeException(s"Could not parse starred segments", error)
         }
     }.takeWhile(_.size != 0 && (retrieveAll || counter == 1)).toList.flatten
   }
@@ -577,7 +585,7 @@ class ScravaClient(accessToken: String) extends Client {
       .params(Seq(("external_id", external_id), ("activity_id", activity_id.get.toString), ("status", status), ("error", error.get)))
     Try { parseWithRateLimits(request).extract[UploadStatus] } match {
       case Success(status) => status
-      case Failure(error) => throw new RuntimeException(s"Could not parse upload status: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse upload status", error)
     }
   }
 
@@ -595,7 +603,7 @@ class ScravaClient(accessToken: String) extends Client {
         daily= Rates(limits.last.toLong, usages.last.toLong))
     } match {
       case Success(rateLimits) => rateLimits
-      case Failure(error) => throw new RuntimeException(s"Could not parse rate limits from headers: $error")
+      case Failure(error) => throw new RuntimeException(s"Could not parse rate limits from headers", error)
     }
   }
 
