@@ -1,17 +1,16 @@
 ![Scrava](https://cloud.githubusercontent.com/assets/4472397/6699144/9a4ee65c-ccd5-11e4-9369-e89eea337b17.jpg)
 
-A lightweight 	Scala client for the Strava API built upon ScalaJ-HTTP library and Lift JSON.
+A lightweight Scala client for the Strava API built upon ScalaJ-HTTP library and Lift JSON.
 
 [![Build Status](https://travis-ci.org/kiambogo/scrava.svg?branch=master)](https://travis-ci.org/kiambogo/scrava)
 [![GitHub version](https://badge.fury.io/gh/kiambogo%2Fscrava.svg)](https://badge.fury.io/gh/kiambogo%2Fscrava)
 
-###Installation
+### Installation
 Scrava is currently built for Scala 2.11 and 2.12. To use scrava in an sbt project, add the following to your project file:
 
     libraryDependencies += "com.github.kiambogo" %% "scrava" % "1.2.3"
 
-###Sample Code
----------------------
+### Sample Code
 
     val client = new ScravaClient("[accessToken]")
     val athlete = client.retrieveAthlete()
@@ -20,8 +19,8 @@ Scrava is currently built for Scala 2.11 and 2.12. To use scrava in an sbt proje
 
 To retrieve perform these functions for a particular athlete/activity/etc, simply pass in the respective ID: `retrieveAthlete(Some([athleteID]))` or `listAthleteFriends(Some([athleteID]))`.
 
-###Auto-Pagination
----------------------
+### Auto-Pagination
+
 The Strava API offers the ability to page through result sets when the corresponding result set to a request is very large. Scrava offers the ability to perform auto-pagination, fetching the entire result set and merging into a single List. To utilize this, simply pass in `retrieveAll = true` into the respective function. Note that this will use additional requests to the API, and may exhaust rate limits in some cases.
 
 -----------------------------
