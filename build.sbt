@@ -4,7 +4,9 @@ organization := "com.github.kiambogo"
 
 version := Process("git describe --dirty --tags --abbrev=0 --always", baseDirectory.value).!!.stripPrefix("v").trim
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.3"
+
+crossScalaVersions := Seq("2.11.8", "2.12.3")
 
 publishMavenStyle := true
 

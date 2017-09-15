@@ -90,7 +90,7 @@ class IntegrationTest extends FlatSpec with Matchers {
 
   it should "retrieve friends activities" in {
     val activities = testClient.listFriendsActivities()
-    activities.size should equal(28)
+    activities.size should be > 20
   }
 
   it should "retrieve activity laps" in {
