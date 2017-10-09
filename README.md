@@ -15,6 +15,9 @@ Scrava is currently built for Scala 2.11 and 2.12. To use scrava in an sbt proje
     val client = new ScravaClient("[accessToken]")
     val athlete = client.retrieveAthlete()
 
+###Build Client without token
+     val (client, athlete) = clientFactory.instance("[APP_ID]", "[APP_SECRET]", "[CODE]")
+
 **Note:** Most functions have optional ID parameters (i.e, `retrieveAthlete()`). If no ID is provided, the function will operate based on the currently authenticated user. Therefore, `retrieveAthlete()` will return the athlete profile of the currently authenticated user (based on the access token provided), and `listAthleteFriends()` will return the list of friends of the currently authenticated athlete.
 
 To retrieve perform these functions for a particular athlete/activity/etc, simply pass in the respective ID: `retrieveAthlete(Some([athleteID]))` or `listAthleteFriends(Some([athleteID]))`.
