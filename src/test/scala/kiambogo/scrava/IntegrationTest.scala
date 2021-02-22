@@ -151,4 +151,23 @@ class IntegrationTest extends FlatSpec with Matchers {
     stream(0).asInstanceOf[LatLng].resolution should equal(Some("high"))
     stream(1).asInstanceOf[Distance].original_size should equal(Some(114))
   }
+
+  /**
+    * Need to provide a valid APP_ID, Secret and Code
+    * The code can be generate with
+    * https://www.strava.com/oauth/authorize?client_id=APP_ID&response_type=code&redirect_uri=http://127.0.0.1/token_exchange&scope=write&state=mystate&approval_prompt=force
+    */
+  ignore should "Make a Token Exchange" in {
+
+    val clientFactory = new ClientFactoryImpl
+    val clientId = "APP_ID"
+    val client_secret = "SEEEECRET"
+    val code = "CODE"
+    val (client, athlete) = clientFactory.instance(clientId, client_secret, code)
+
+    athlete.firstname should equal("Luis Miguel")
+    client.listAthleteClubs
+
+  }
+
 }
