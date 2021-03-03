@@ -2,9 +2,7 @@ name := "Scrava"
 
 organization := "com.github.kiambogo"
 
-version := Process("git describe --dirty --tags --abbrev=0 --always", baseDirectory.value).!!.stripPrefix("v").trim
-
-scalaVersion := "2.12.3"
+scalaVersion := "2.13.5"
 
 crossScalaVersions := Seq("2.11.8", "2.12.3")
 
@@ -23,11 +21,9 @@ publishTo := {
 }
 
 libraryDependencies ++= Seq(
-  "org.scalaj" %% "scalaj-http" % "2.3.0",
-  "net.liftweb" %% "lift-json" % "3.0.1",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "joda-time" % "joda-time" % "2.9.7",
-  "org.joda" % "joda-convert" % "1.8"
+  "org.scalaj" %% "scalaj-http" % "2.4.2",
+  "io.argonaut" %% "argonaut" % "6.3.3",
+  "org.scalatest" %% "scalatest" % "3.2.5" % "test",
 )
 
 pomExtra :=
